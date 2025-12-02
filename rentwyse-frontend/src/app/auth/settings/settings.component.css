@@ -1,0 +1,193 @@
+/* Layout */
+.settings-page {
+  padding-bottom: 2rem;
+}
+
+.settings-sidebar-card {
+  padding: 1.5rem 1.25rem;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.settings-sidebar-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.settings-sidebar-subtitle {
+  font-size: 0.9rem;
+  color: #777;
+  margin: 0 0 1rem;
+}
+
+/* Sidebar nav */
+.settings-nav {
+  margin-top: 0.5rem;
+}
+
+.settings-nav-item {
+  border: none;
+  border-radius: 8px !important;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  background-color: #f6f6f6;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  text-align: left;
+}
+
+.settings-nav-item:hover {
+  background-color: #e0e0e0;
+}
+
+.settings-nav-item.active,
+.list-group-item.active {
+  background-color: #000000 !important;
+  border-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Main card */
+.settings-card {
+  position: relative;
+  padding: 1.75rem 1.5rem 1.5rem;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.settings-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.settings-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.settings-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+/* Loading overlay */
+.settings-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+/* Spinner color */
+.uploader-status ::ng-deep .mat-progress-spinner circle,
+.uploader-status .mat-spinner circle {
+  stroke: #000000;
+}
+
+/* Form */
+.settings-form {
+  width: 100%;
+}
+
+/* Grid for fields */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  margin-bottom: 1.25rem;
+}
+
+.settings-grid.single-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Section headings */
+.section-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #999;
+}
+
+/* Material fields full width */
+mat-form-field {
+  width: 100%;
+}
+
+/* Buttons */
+.button-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+button[mat-raised-button] {
+  padding-left: 2rem;
+  padding-right: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: black;
+  color: aliceblue;
+}
+
+/* Divider between sections */
+.settings-divider {
+  margin-top: 0.75rem;
+}
+
+/* Placeholder text for other sections */
+.coming-soon-text {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.placeholder-list {
+  padding-left: 1.2rem;
+  margin: 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-sidebar-card {
+    margin-bottom: 1rem;
+  }
+
+  .button-row {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 576px) {
+  .settings-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .settings-title {
+    font-size: 1.2rem;
+  }
+
+  .settings-sidebar-title {
+    font-size: 1.1rem;
+  }
+}

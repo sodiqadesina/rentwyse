@@ -1,0 +1,29 @@
+/* Make document use full viewport height and remove default margins */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Root layout: header | content (flex) | footer */
+.app-shell {
+  min-height: 100vh;       /* at least full viewport height */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Middle section between header and footer */
+.app-content {
+  flex: 1 0 auto;          /* take remaining space, but can grow beyond */
+}
+
+/* Footer should not shrink */
+app-footer {
+  flex-shrink: 0;
+}
+
+/* No special overflow tricks – let the page scroll normally */
+body {
+  overflow-y: auto;
+}

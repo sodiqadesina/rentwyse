@@ -1,0 +1,37 @@
+<svg width="1200" height="260" viewBox="0 0 1200 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cloudGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f9fbff"/>
+      <stop offset="100%" stop-color="#dee6f5"/>
+    </linearGradient>
+    <linearGradient id="cloudGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#eef3ff"/>
+      <stop offset="100%" stop-color="#d7e0f2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Left cloud cluster -->
+  <g fill="url(#cloudGrad1)" opacity="0.9">
+    <ellipse cx="120" cy="170" rx="90" ry="38"/>
+    <ellipse cx="190" cy="155" rx="80" ry="32"/>
+    <ellipse cx="250" cy="175" rx="95" ry="40"/>
+    <ellipse cx="200" cy="190" rx="110" ry="42"/>
+  </g>
+
+  <!-- Center large cloud cluster -->
+  <g fill="url(#cloudGrad2)" opacity="0.9">
+    <ellipse cx="520" cy="160" rx="120" ry="46"/>
+    <ellipse cx="620" cy="145" rx="130" ry="50"/>
+    <ellipse cx="710" cy="165" rx="115" ry="44"/>
+    <ellipse cx="640" cy="185" rx="145" ry="50"/>
+    <ellipse cx="550" cy="185" rx="105" ry="42"/>
+  </g>
+
+  <!-- Right cloud cluster -->
+  <g fill="url(#cloudGrad1)" opacity="0.9">
+    <ellipse cx="930" cy="165" rx="100" ry="40"/>
+    <ellipse cx="1010" cy="150" rx="90" ry="36"/>
+    <ellipse cx="1080" cy="170" rx="95" ry="38"/>
+    <ellipse cx="1020" cy="190" rx="120" ry="44"/>
+  </g>
+</svg>

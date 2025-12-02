@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/9d483ab9-79e6-4b6f-a3b3-3fe80db0b4ac/resourceGroups/rentwyse/providers/Microsoft.Web/sites/rentwyse-frontend",
+    "appService.deploySubpath": "."
+}

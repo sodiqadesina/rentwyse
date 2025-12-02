@@ -1,0 +1,201 @@
+<div class="my-listings-shell">
+  <!-- Top bar -->
+  <div class="my-listings-header">
+    <div>
+      <h1 class="my-listings-title">My Listings</h1>
+      <p class="my-listings-subtitle">
+        Manage the rentals you’ve published on RentWyse.
+      </p>
+    </div>
+
+    <div class="post-btn">
+      <a
+        routerLink="/create"
+        class="btn badge text-wrap post-rental-btn"
+      >
+        Post a Rental
+      </a>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Empty state -->
+  <div
+    class="empty-state"
+    *ngIf="!isLoading && posts.length === 0"
+  >
+    <mat-icon class="empty-icon">home_work</mat-icon>
+    <h2>No listings yet</h2>
+    <p>
+      Start by creating your first rental listing so renters can discover your place.
+    </p>
+    <a
+      routerLink="/create"
+      class="btn badge text-wrap empty-cta"
+    >
+      Post a Rental
+    </a>
+  </div>
+
+  <!-- Listings grid -->
+  <div
+    class="listings-grid"
+    *ngIf="!isLoading && posts.length > 0"
+  >
+    <mat-card
+      class="listing-card"
+      *ngFor="let post of posts"
+    >
+      <!-- Image / slider -->
+      <div
+        class="listing-image-wrapper"
+        *ngIf="post.imagePath && post.imagePath.length > 0"
+      >
+        <img
+          class="listing-image"
+          [src]="post.imagePath[currentImageIndices[post._id] || 0]"
+          [alt]="post.title"
+        />
+
+        <!-- Slider controls -->
+        <button
+          mat-icon-button
+          class="slider-nav-button left"
+          (click)="previousImage(post._id)"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          class="slider-nav-button right"
+          (click)="nextImage(post._id, post.imagePath.length)"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+
+        <!-- Counter -->
+        <div class="image-counter">
+          <span>
+            {{ (currentImageIndices[post._id] || 0) + 1 }}
+            /
+            {{ post.imagePath.length }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Card body -->
+      <mat-card-content class="listing-content">
+        <div class="listing-header-row">
+          <h2 class="listing-title">
+            {{ post.title }}
+          </h2>
+          <div class="listing-price">
+            <span class="price-amount">
+              ${{ post.price }}
+            </span>
+            <span class="price-unit">/month</span>
+          </div>
+        </div>
+
+        <div class="listing-location-row">
+          <mat-icon>place</mat-icon>
+          <span>
+            {{ post.address }},
+            {{ post.city }},
+            {{ post.province }},
+            {{ post.zipcode }},
+            {{ post.country }}
+          </span>
+        </div>
+
+        <div class="listing-meta-row">
+          <div class="meta-pill">
+            <mat-icon>king_bed</mat-icon>
+            <span>{{ post.bedroom }} bed</span>
+          </div>
+          <div class="meta-pill">
+            <mat-icon>bathtub</mat-icon>
+            <span>{{ post.bathroom }} bath</span>
+          </div>
+          <div class="meta-pill">
+            <mat-icon>house</mat-icon>
+            <span>{{ post.rentType }}</span>
+          </div>
+        </div>
+
+        <div class="listing-flags-row">
+          <div class="flag-pill" [class.flag-on]="post.furnished">
+            <mat-icon>check_circle_outline</mat-icon>
+            <span>Furnished</span>
+          </div>
+          <div class="flag-pill" [class.flag-on]="post.parkingAvailable">
+            <mat-icon>directions_car</mat-icon>
+            <span>Parking</span>
+          </div>
+        </div>
+
+        <p class="listing-description">
+          {{ post.description }}
+        </p>
+
+        <div class="listing-dates-row">
+          <div class="date-item">
+            <mat-icon>event</mat-icon>
+            <span>
+              Listed:
+              {{ post.dateListed | date: 'MMM d, y' }}
+            </span>
+          </div>
+          <div class="date-item">
+            <mat-icon>event_available</mat-icon>
+            <span>
+              Available:
+              {{ post.dateAvailableForRent | date: 'MMM d, y' }}
+            </span>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <!-- Actions -->
+      <mat-card-actions
+        class="listing-actions"
+        *ngIf="userIsAuth && userId === post.creator"
+      >
+        <a
+          mat-button
+          color="primary"
+          [routerLink]="['/edit', post._id]"
+        >
+          <mat-icon>edit</mat-icon>
+          Edit
+        </a>
+        <button
+          mat-button
+          color="warn"
+          (click)="onDelete(post._id)"
+        >
+          <mat-icon>delete</mat-icon>
+          Delete
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Paginator -->
+  <div
+    class="paginator-wrapper"
+    *ngIf="!isLoading && posts.length > 0"
+  >
+    <mat-paginator
+      [length]="totalPosts"
+      [pageSize]="postPerPage"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onChangePage($event)"
+    >
+    </mat-paginator>
+  </div>
+</div>

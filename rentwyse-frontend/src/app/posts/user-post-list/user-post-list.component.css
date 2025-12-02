@@ -1,0 +1,342 @@
+.my-listings-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+/* Top bar */
+.my-listings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.my-listings-title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.my-listings-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+  color: #777;
+}
+
+/* Post button reuse from home, adjusted */
+.post-btn {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.post-rental-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #000000;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #f0bb00;
+  cursor: pointer;
+  transition: transform 0.2s;
+  text-decoration: none;
+  width: auto;
+  min-width: 180px;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.post-rental-btn:hover {
+  transform: scale(1.05);
+}
+
+.post-rental-btn:active {
+  transform: scale(1);
+  color: #f0bb00;
+  background-color: #000000;
+}
+
+/* Loading state */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+mat-spinner {
+  margin: auto;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: #cccccc;
+  margin-bottom: 0.75rem;
+}
+
+.empty-state h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.4rem;
+}
+
+.empty-state p {
+  margin: 0 0 1.2rem;
+  color: #777;
+  font-size: 0.95rem;
+}
+
+.empty-cta {
+  display: inline-block;
+  padding: 10px 22px;
+  background-color: #000000;
+  border-radius: 999px;
+  color: #f0bb00;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Listings grid */
+.listings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+/* Single column on smaller screens */
+@media (max-width: 900px) {
+  .listings-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .my-listings-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .post-btn {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .post-rental-btn {
+    width: 100%;
+  }
+}
+
+/* Listing card */
+.listing-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Image area */
+.listing-image-wrapper {
+  position: relative;
+  width: 100%;
+  background: #f5f5f5;
+}
+
+.listing-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+/* Slider nav buttons */
+.slider-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.45) !important;
+  color: #fff !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.slider-nav-button.left {
+  left: 8px;
+}
+
+.slider-nav-button.right {
+  right: 8px;
+}
+
+/* Image counter */
+.image-counter {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background: rgba(0, 0, 0, 0.68);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+/* Card content */
+.listing-content {
+  padding: 1.1rem 1.2rem 0.6rem;
+}
+
+/* Header row: title + price */
+.listing-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.listing-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.listing-price {
+  text-align: right;
+}
+
+.price-amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.price-unit {
+  display: block;
+  font-size: 0.75rem;
+  color: #777;
+}
+
+/* Location row */
+.listing-location-row {
+  display: flex;
+  align-items: center;          /* align icon + text on same baseline */
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 0.4rem;
+}
+
+.listing-location-row mat-icon {
+  font-size: 18px;
+}
+
+/* Meta row */
+.listing-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0.4rem 0;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f3f3f3;
+  font-size: 0.8rem;
+}
+
+/* Flags row (furnished, parking) */
+.listing-flags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0.35rem 0 0.5rem;
+}
+
+.flag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  font-size: 0.78rem;
+  color: #666;
+  background: #fafafa;
+}
+
+.flag-pill.flag-on {
+  border-color: #000;
+  background: #000;
+  color: #f0bb00;
+}
+
+/* Description */
+.listing-description {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0.3rem 0 0.5rem;
+}
+
+/* Dates row */
+.listing-dates-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #777;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.date-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Actions */
+.listing-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5rem 1.2rem 0.9rem;
+}
+
+.listing-actions a[mat-button],
+.listing-actions button[mat-button] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ✅ Global icon alignment INSIDE listing cards */
+.listing-card mat-icon,
+.empty-state mat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Fine-tuned sizes for card icons */
+.listing-card .listing-location-row mat-icon,
+.listing-card .meta-pill mat-icon,
+.listing-card .flag-pill mat-icon,
+.listing-card .date-item mat-icon,
+.listing-actions mat-icon {
+  font-size: 18px;
+}
+
+/* Paginator */
+.paginator-wrapper {
+  margin-top: 1.5rem;
+}

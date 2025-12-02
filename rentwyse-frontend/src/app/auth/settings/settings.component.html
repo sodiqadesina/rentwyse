@@ -1,0 +1,272 @@
+<!-- settings.component.html -->
+<div class="settings-page container mt-4">
+  <div class="row">
+    <!-- Sidebar: Settings Sections -->
+    <div class="col-lg-3 mb-3">
+      <mat-card class="settings-sidebar-card">
+        <h2 class="settings-sidebar-title">Settings</h2>
+        <p class="settings-sidebar-subtitle">
+          Manage your account, privacy, and preferences.
+        </p>
+
+        <div class="list-group settings-nav">
+          <button
+            type="button"
+            class="list-group-item list-group-item-action settings-nav-item"
+            *ngFor="let section of settingsSections"
+            [class.active]="section === selectedSection"
+            (click)="selectSection(section)"
+          >
+            {{ section }}
+          </button>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Main content -->
+    <div class="col-lg-9">
+      <!-- USER INFORMATION + PASSWORD -->
+      <div *ngIf="selectedSection === 'User Information'">
+        <mat-card class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3 class="settings-title">Profile & Security</h3>
+              <p class="settings-subtitle">
+                Update your personal details and change your password.
+              </p>
+            </div>
+          </div>
+
+          <!-- Loading overlay -->
+          <div class="settings-loading-overlay" *ngIf="isLoading">
+            <mat-spinner></mat-spinner>
+          </div>
+
+          <!-- User Info Form -->
+          <form
+            [formGroup]="userForm"
+            (ngSubmit)="onSubmit()"
+            class="settings-form"
+            *ngIf="!isLoading"
+          >
+            <h4 class="section-heading">User Information</h4>
+
+            <div class="settings-grid">
+              <!-- Email (readonly) -->
+              <mat-form-field appearance="outline">
+                <mat-label>E-mail</mat-label>
+                <input matInput formControlName="email" readonly />
+              </mat-form-field>
+
+              <!-- Username (readonly) -->
+              <mat-form-field appearance="outline">
+                <mat-label>Username</mat-label>
+                <input matInput formControlName="username" readonly />
+                <mat-error *ngIf="userForm.get('username')?.invalid">
+                  Please enter a valid username.
+                </mat-error>
+              </mat-form-field>
+
+              <!-- First Name -->
+              <mat-form-field appearance="outline">
+                <mat-label>First Name</mat-label>
+                <input matInput formControlName="firstName" />
+              </mat-form-field>
+
+              <!-- Last Name -->
+              <mat-form-field appearance="outline">
+                <mat-label>Last Name</mat-label>
+                <input matInput formControlName="lastName" />
+              </mat-form-field>
+
+              <!-- Address -->
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Address</mat-label>
+                <textarea
+                  matInput
+                  formControlName="address"
+                  rows="2"
+                ></textarea>
+              </mat-form-field>
+
+              <!-- City -->
+              <mat-form-field appearance="outline">
+                <mat-label>City</mat-label>
+                <input matInput formControlName="city" />
+              </mat-form-field>
+
+              <!-- Province -->
+              <mat-form-field appearance="outline">
+                <mat-label>Province</mat-label>
+                <input matInput formControlName="province" />
+              </mat-form-field>
+
+              <!-- Zipcode -->
+              <mat-form-field appearance="outline">
+                <mat-label>Zipcode</mat-label>
+                <input matInput formControlName="zipcode" />
+              </mat-form-field>
+
+              <!-- Country -->
+              <mat-form-field appearance="outline">
+                <mat-label>Country</mat-label>
+                <input matInput formControlName="country" />
+              </mat-form-field>
+
+              <!-- Phone -->
+              <mat-form-field appearance="outline">
+                <mat-label>Phone</mat-label>
+                <input
+                  matInput
+                  formControlName="phone"
+                  placeholder="Phone Number"
+                />
+                <mat-error *ngIf="userForm.get('phone')?.invalid">
+                  Please enter a valid phone number.
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="button-row">
+              <button mat-raised-button color="accent" type="submit">
+                Update Profile
+              </button>
+            </div>
+          </form>
+
+          <mat-divider class="settings-divider" *ngIf="!isLoading"></mat-divider>
+
+          <!-- Password Change Form -->
+          <form
+            class="settings-form pt-3"
+            [formGroup]="passwordForm"
+            (ngSubmit)="onChangePassword()"
+            *ngIf="!isLoading"
+          >
+            <h4 class="section-heading">Change Password</h4>
+
+            <div class="settings-grid single-column">
+              <!-- Current Password -->
+              <mat-form-field appearance="outline">
+                <mat-label>Current Password</mat-label>
+                <input
+                  matInput
+                  [type]="hideCurrentPassword ? 'password' : 'text'"
+                  formControlName="currentPassword"
+                />
+                <button
+                  mat-icon-button
+                  matSuffix
+                  (click)="toggleCurrentPasswordVisibility()"
+                  type="button"
+                >
+                  <mat-icon>{{
+                    hideCurrentPassword ? 'visibility_off' : 'visibility'
+                  }}</mat-icon>
+                </button>
+              </mat-form-field>
+
+              <!-- New Password -->
+              <mat-form-field appearance="outline">
+                <mat-label>New Password</mat-label>
+                <input
+                  matInput
+                  [type]="hideNewPassword ? 'password' : 'text'"
+                  formControlName="newPassword"
+                />
+                <button
+                  mat-icon-button
+                  matSuffix
+                  (click)="toggleNewPasswordVisibility()"
+                  type="button"
+                >
+                  <mat-icon>{{
+                    hideNewPassword ? 'visibility_off' : 'visibility'
+                  }}</mat-icon>
+                </button>
+              </mat-form-field>
+
+              <!-- Confirm New Password -->
+              <mat-form-field appearance="outline">
+                <mat-label>Confirm New Password</mat-label>
+                <input
+                  matInput
+                  [type]="hideConfirmNewPassword ? 'password' : 'text'"
+                  formControlName="confirmNewPassword"
+                />
+                <button
+                  mat-icon-button
+                  matSuffix
+                  (click)="toggleConfirmNewPasswordVisibility()"
+                  type="button"
+                >
+                  <mat-icon>{{
+                    hideConfirmNewPassword ? 'visibility_off' : 'visibility'
+                  }}</mat-icon>
+                </button>
+              </mat-form-field>
+            </div>
+
+            <div class="button-row">
+              <button mat-raised-button color="accent" type="submit">
+                Change Password
+              </button>
+            </div>
+          </form>
+        </mat-card>
+      </div>
+
+      <!-- PRIVACY SETTINGS -->
+      <div *ngIf="selectedSection === 'Privacy Settings'">
+        <mat-card class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3 class="settings-title">Privacy Settings</h3>
+              <p class="settings-subtitle">
+                Control how your profile and data are shared.
+              </p>
+            </div>
+          </div>
+
+          <!-- Placeholder content: wire to real controls later -->
+          <div class="settings-form">
+            <p class="coming-soon-text">
+              Privacy options will appear here. You can add toggles like:
+            </p>
+            <ul class="placeholder-list">
+              <li>Show profile to other users</li>
+              <li>Allow messages from renters/owners</li>
+              <li>Receive marketing emails</li>
+            </ul>
+          </div>
+        </mat-card>
+      </div>
+
+      <!-- ACCOUNT PREFERENCES -->
+      <div *ngIf="selectedSection === 'Account Preferences'">
+        <mat-card class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3 class="settings-title">Account Preferences</h3>
+              <p class="settings-subtitle">
+                Customize notifications, language, and display options.
+              </p>
+            </div>
+          </div>
+
+          <!-- Placeholder content: wire to real controls later -->
+          <div class="settings-form">
+            <p class="coming-soon-text">
+              Preferences will appear here. You can add controls like:
+            </p>
+            <ul class="placeholder-list">
+              <li>Notification frequency</li>
+              <li>Preferred language</li>
+              <li>Default search filters</li>
+            </ul>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

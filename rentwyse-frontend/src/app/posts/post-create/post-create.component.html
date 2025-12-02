@@ -1,0 +1,367 @@
+<div class="post-create-shell">
+  <div class="post-create-header">
+    <div class="post-create-title-block">
+      <span class="post-create-kicker">
+        RentWyse · {{ mode === 'edit' ? 'Edit listing' : 'New listing' }}
+      </span>
+      <h1 class="post-create-title">
+        {{ mode === 'edit' ? 'Update your rental listing' : 'Create a rental listing' }}
+      </h1>
+      <p class="post-create-subtitle">
+        Add details, upload photos, and publish your place so renters can find it.
+      </p>
+    </div>
+
+    <div class="post-create-meta">
+      <span class="mode-pill" [class.mode-edit]="mode === 'edit'">
+        <mat-icon>home_work</mat-icon>
+        <span>{{ mode === 'edit' ? 'Editing' : 'Drafting' }}</span>
+      </span>
+    </div>
+  </div>
+
+  <mat-card class="post-card">
+    <!-- Loading overlay -->
+    <div class="post-loading-overlay" *ngIf="isLoading">
+      <mat-spinner diameter="42"></mat-spinner>
+    </div>
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onAddPost()"
+      *ngIf="!isLoading"
+      class="post-form"
+    >
+      <!-- SECTION 1: Overview -->
+      <section class="post-section">
+        <div class="section-header">
+          <span class="section-chip">1</span>
+          <div>
+            <h2>Overview</h2>
+            <p>Give renters a quick sense of what you’re offering.</p>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="title"
+              placeholder="Bright 2-bedroom apartment near UW and LRT"
+            />
+            <mat-error *ngIf="form.get('title')?.invalid">
+              Please enter a post title.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea
+              matInput
+              rows="5"
+              formControlName="description"
+              placeholder="Describe the layout, amenities, nearby transit, and anything renters should know."
+            ></textarea>
+            <mat-error *ngIf="form.get('description')?.invalid">
+              Please enter a post description.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- SECTION 2: Photos -->
+      <section class="post-section">
+        <div class="section-header">
+          <span class="section-chip">2</span>
+          <div>
+            <h2>Photos</h2>
+            <p>Upload up to 10 photos. Drag them to reorder – the first image is your cover.</p>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <div class="photo-upload-row">
+            <div
+              class="photo-dropzone"
+              (click)="filePicker.click()"
+            >
+              <div class="photo-dropzone-inner">
+                <mat-icon>add_a_photo</mat-icon>
+                <div class="dropzone-text-main">Click to upload</div>
+                <div class="dropzone-text-sub">
+                  or drag files into this area
+                </div>
+                <div class="dropzone-hint">
+                  PNG, JPG up to 10 images
+                </div>
+              </div>
+            </div>
+
+            <input
+              type="file"
+              name="image"
+              #filePicker
+              (change)="onImagePicked($event)"
+              multiple
+            />
+          </div>
+
+          <div
+            class="image-preview"
+            *ngIf="imagePreview?.length"
+            cdkDropList
+            (cdkDropListDropped)="drop($event)"
+          >
+            <div
+              class="img-thumbnail"
+              *ngFor="let img of imagePreview; let i = index"
+              cdkDrag
+            >
+              <div class="img-thumb-inner">
+                <img
+                  [src]="img"
+                  [alt]="form.value.title || 'Listing image'"
+                />
+                <button
+                  type="button"
+                  class="remove-img-btn"
+                  (click)="removeImage(img)"
+                >
+                  ×
+                </button>
+                <span *ngIf="i === 0" class="cover-badge">Cover</span>
+              </div>
+            </div>
+          </div>
+
+          <mat-error *ngIf="form.get('image')?.invalid">
+            Please upload up to 10 valid images.
+          </mat-error>
+        </div>
+      </section>
+
+      <!-- SECTION 3: Property details -->
+      <section class="post-section">
+        <div class="section-header">
+          <span class="section-chip">3</span>
+          <div>
+            <h2>Property details</h2>
+            <p>Help renters understand the layout and setup.</p>
+          </div>
+        </div>
+
+        <div class="section-body grid two-col">
+          <mat-form-field appearance="outline">
+            <mat-label>Bedrooms</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="bedroom"
+              placeholder="e.g. 2"
+            />
+            <mat-error *ngIf="form.get('bedroom')?.invalid">
+              Please enter number of bedrooms.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Bathrooms</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="bathroom"
+              placeholder="e.g. 1"
+            />
+            <mat-error *ngIf="form.get('bathroom')?.invalid">
+              Please enter number of bathrooms.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Type of Property</mat-label>
+            <mat-select formControlName="typeOfProperty">
+              <mat-option
+                *ngFor="let type of propertyTypes"
+                [value]="type"
+              >
+                {{ type }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Rent Type</mat-label>
+            <mat-select formControlName="rentType">
+              <mat-option
+                *ngFor="let type of rentTypes"
+                [value]="type"
+              >
+                {{ type }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="toggle-row full-width">
+            <mat-checkbox formControlName="furnished">
+              Furnished
+            </mat-checkbox>
+            <mat-checkbox formControlName="parkingAvailable">
+              Parking available
+            </mat-checkbox>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: Pricing & dates -->
+      <section class="post-section">
+        <div class="section-header">
+          <span class="section-chip">4</span>
+          <div>
+            <h2>Pricing & dates</h2>
+            <p>Set your monthly rent and availability.</p>
+          </div>
+        </div>
+
+        <div class="section-body grid two-col">
+          <mat-form-field appearance="outline">
+            <mat-label>Price per month (CAD)</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="price"
+              placeholder="e.g. 2200"
+            />
+            <mat-error *ngIf="form.get('price')?.invalid">
+              Please enter a price.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field
+            appearance="outline"
+            *ngIf="mode === 'edit'"
+          >
+            <mat-label>Date listed</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="dateListed"
+              placeholder="Date listed"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date available for rent</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker2"
+              formControlName="dateAvailableForRent"
+              placeholder="Select a date"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="picker2"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- SECTION 5: Location -->
+      <section class="post-section">
+        <div class="section-header">
+          <span class="section-chip">5</span>
+          <div>
+            <h2>Location</h2>
+            <p>Tell renters where this place is.</p>
+          </div>
+        </div>
+
+        <div class="section-body grid two-col">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Address</mat-label>
+            <input
+              matInput
+              type="text"
+              placeholder="Street address"
+              formControlName="address"
+              #addressInput
+            />
+            <mat-error *ngIf="form.get('address')?.invalid">
+              Please enter an address.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>City</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="city"
+              placeholder="e.g. Waterloo"
+            />
+            <mat-error *ngIf="form.get('city')?.invalid">
+              Please enter a city.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Province</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="province"
+              placeholder="e.g. Ontario"
+            />
+            <mat-error *ngIf="form.get('province')?.invalid">
+              Please enter a province.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Postal code</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="zipcode"
+              placeholder="e.g. N2L 3G1"
+            />
+            <mat-error *ngIf="form.get('zipcode')?.invalid">
+              Please enter a zipcode.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Country</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="country"
+              placeholder="e.g. Canada"
+            />
+            <mat-error *ngIf="form.get('country')?.invalid">
+              Please enter a country.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- ACTIONS -->
+      <div class="post-actions">
+        <button
+          mat-raised-button
+          type="submit"
+          [disabled]="form.invalid"
+        >
+          {{ mode === 'edit' ? 'Save changes' : 'Publish listing' }}
+        </button>
+      </div>
+    </form>
+  </mat-card>
+</div>

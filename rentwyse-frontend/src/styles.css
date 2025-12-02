@@ -1,0 +1,75 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; width: 100%; margin: 0; overflow-x: hidden;}
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; width: 100%; }
+
+/* App-specific styles */
+app-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* width: 100%; */
+}
+
+app-header {
+    flex-shrink: 0;
+    height: 80px;
+}
+
+main {
+    flex: 1;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+}
+
+app-footer {
+    flex-shrink: 0;
+}
+
+app-home{
+    height: 100%;
+}
+
+app-post-list{
+    width: 80%;
+    margin: auto;
+  }
+
+  
+  mat-spinner{
+    margin: auto;
+    stroke: black!important;
+    color:  black!important;
+    ;
+}
+
+::ng-deep .mat-spinner circle,
+::ng-deep .mat-progress-spinner circle {
+  stroke: black !important; /* Change to any color you want */
+}::ng-deep .mat-spinner circle,
+::ng-deep .mat-progress-spinner circle {
+  stroke: black !important; /* Change to any color you want */
+}
+
+/* In your global styles.css file */
+.mat-progress-spinner circle, .mat-spinner circle {
+    stroke: black !important;
+  }
+  
+  .custom-snackbar {
+    /**/
+  }
+
+  @media (min-width: 901px) {
+  body {
+    overflow: auto
+  }
+
+  .app-content {
+    overflow-y: auto;
+    overflow-x: hidden;   /*  prevent horizontal slider */
+  }
+}

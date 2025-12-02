@@ -1,0 +1,222 @@
+<div class="auth-page">
+  <div class="auth-card-wrapper">
+    <mat-card class="auth-card">
+      <div class="auth-header">
+        <h1 class="auth-title">Create your account</h1>
+        <p class="auth-subtitle">
+          Join RentWyse to list rentals, book viewings, and chat with owners.
+        </p>
+      </div>
+
+      <div class="auth-loading" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <div class="auth-body-scroll" *ngIf="signupForm && !isLoading">
+        <form
+          [formGroup]="signupForm"
+          (ngSubmit)="onSignup()"
+          class="auth-form"
+        >
+          <!-- STEP 0: ACCOUNT DETAILS -->
+          <ng-container *ngIf="currentStep === 0">
+            <h2 class="section-title">Account details</h2>
+
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="auth-field">
+                <mat-label>E-mail</mat-label>
+                <input matInput type="email" formControlName="email" />
+                <mat-error *ngIf="signupForm.get('email')?.errors?.['required']">
+                  Email is required
+                </mat-error>
+                <mat-error *ngIf="signupForm.get('email')?.errors?.['email']">
+                  Enter a valid email
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="auth-field">
+                <mat-label>Username</mat-label>
+                <input matInput type="text" formControlName="username" />
+                <mat-error
+                  *ngIf="signupForm.get('username')?.errors?.['required']"
+                >
+                  Username is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="auth-field">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" formControlName="password" />
+                <mat-error
+                  *ngIf="signupForm.get('password')?.errors?.['required']"
+                >
+                  Password is required
+                </mat-error>
+                <mat-error
+                  *ngIf="signupForm.get('password')?.errors?.['minlength']"
+                >
+                  Password must be at least 8 characters long
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="auth-field">
+                <mat-label>Confirm Password</mat-label>
+                <input
+                  matInput
+                  type="password"
+                  formControlName="confirmPassword"
+                />
+                <mat-error
+                  *ngIf="
+                    signupForm.get('confirmPassword')?.errors?.['required']
+                  "
+                >
+                  Confirm password is required
+                </mat-error>
+                <mat-error *ngIf="signupForm.errors?.['passwordMismatch']">
+                  Passwords do not match
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </ng-container>
+
+          <!-- STEP 1: PERSONAL DETAILS -->
+          <ng-container *ngIf="currentStep === 1">
+            <h2 class="section-title">Personal details</h2>
+
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="auth-field">
+                <mat-label>First Name</mat-label>
+                <input matInput type="text" formControlName="firstName" />
+                <mat-error
+                  *ngIf="signupForm.get('firstName')?.errors?.['required']"
+                >
+                  First name is required
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="auth-field">
+                <mat-label>Last Name</mat-label>
+                <input matInput type="text" formControlName="lastName" />
+                <mat-error
+                  *ngIf="signupForm.get('lastName')?.errors?.['required']"
+                >
+                  Last name is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </ng-container>
+
+          <!-- STEP 2: ADDRESS & PHONE -->
+          <ng-container *ngIf="currentStep === 2">
+            <h2 class="section-title">Address</h2>
+
+            <mat-form-field appearance="outline" class="auth-field full-width">
+              <mat-label>Street Address</mat-label>
+              <input matInput type="text" formControlName="address" />
+              <mat-error
+                *ngIf="signupForm.get('address')?.errors?.['required']"
+              >
+                Address is required
+              </mat-error>
+            </mat-form-field>
+
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="auth-field">
+                <mat-label>City</mat-label>
+                <input matInput type="text" formControlName="city" />
+                <mat-error *ngIf="signupForm.get('city')?.errors?.['required']">
+                  City is required
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="auth-field">
+                <mat-label>Province/State</mat-label>
+                <input matInput type="text" formControlName="province" />
+                <mat-error
+                  *ngIf="signupForm.get('province')?.errors?.['required']"
+                >
+                  Province is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="auth-field">
+                <mat-label>Postal / ZIP Code</mat-label>
+                <input matInput type="text" formControlName="zipcode" />
+                <mat-error
+                  *ngIf="signupForm.get('zipcode')?.errors?.['required']"
+                >
+                  Postal/ZIP code is required
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="auth-field">
+                <mat-label>Country</mat-label>
+                <input matInput type="text" formControlName="country" />
+                <mat-error
+                  *ngIf="signupForm.get('country')?.errors?.['required']"
+                >
+                  Country is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="auth-field full-width">
+              <mat-label>Phone</mat-label>
+              <input matInput type="tel" formControlName="phone" />
+              <mat-error *ngIf="signupForm.get('phone')?.errors?.['required']">
+                Phone number is required
+              </mat-error>
+              <mat-error *ngIf="signupForm.get('phone')?.errors?.['pattern']">
+                Please enter a valid phone number
+              </mat-error>
+            </mat-form-field>
+          </ng-container>
+
+          <!-- ACTIONS -->
+          <div class="auth-footer">
+            <button
+              mat-button
+              type="button"
+              (click)="prevStep()"
+              *ngIf="currentStep > 0"
+            >
+              Back
+            </button>
+
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
+              class="auth-primary-btn"
+              (click)="nextStep()"
+              *ngIf="currentStep < 2"
+            >
+              Next
+            </button>
+
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              class="auth-primary-btn"
+              *ngIf="currentStep === 2"
+              [disabled]="signupForm.invalid"
+            >
+              Sign up
+            </button>
+          </div>
+
+          <div class="auth-footer">
+            <span>Already have an account? </span>
+            <a routerLink="/auth/login">Login</a>
+          </div>
+        </form>
+      </div>
+    </mat-card>
+  </div>
+</div>

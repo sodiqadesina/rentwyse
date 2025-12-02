@@ -1,0 +1,320 @@
+<div class="rentals-shell">
+  <!-- Header + filters -->
+  <mat-card class="filter-card">
+    <div class="filter-header">
+      <div>
+        <h1 class="page-title">Browse Rentals</h1>
+        <p class="page-subtitle">
+          Find apartments, rooms, and houses available for rent.
+        </p>
+      </div>
+
+      <div class="filter-actions">
+        <button
+          mat-stroked-button
+          type="button"
+          class="reset-btn"
+          (click)="onClearFilters()"
+        >
+          Clear filters
+        </button>  
+
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="applyFilters()"
+        >
+          Search
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter form -->
+    <div class="filter-form">
+      <mat-form-field appearance="outline">
+        <mat-label>City</mat-label>
+        <input
+          matInput
+          placeholder="Waterloo, Toronto..."
+          [(ngModel)]="filterCity"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Bedrooms</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0"
+          placeholder="Any"
+          [(ngModel)]="filterBedroom"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Bathrooms</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0"
+          placeholder="Any"
+          [(ngModel)]="filterBathroom"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Furnished</mat-label>
+        <mat-select [(ngModel)]="filterFurnished">
+          <mat-option [value]="undefined">Any</mat-option>
+          <mat-option [value]="true">Yes</mat-option>
+          <mat-option [value]="false">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Parking</mat-label>
+        <mat-select [(ngModel)]="filterParkingAvailable">
+          <mat-option [value]="undefined">Any</mat-option>
+          <mat-option [value]="true">Available</mat-option>
+          <mat-option [value]="false">Not available</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Min price</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0"
+          placeholder="0"
+          [(ngModel)]="filterMinPrice"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Max price</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0"
+          placeholder="Any"
+          [(ngModel)]="filterMaxPrice"
+        />
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  <!-- Loading -->
+  <div class="loading-wrapper" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <!-- Listings -->
+  <div
+    class="rentals-grid"
+    *ngIf="!isLoading && posts.length > 0"
+  >
+    <mat-card
+      class="rental-card"
+      *ngFor="let post of posts"
+    >
+      <!-- Image slider -->
+      <div
+        class="rental-media"
+        *ngIf="post.imagePath && post.imagePath.length > 0"
+      >
+        <div class="rental-image-wrapper">
+          <img
+            [src]="post.imagePath[currentImageIndices[post._id] || 0]"
+            [alt]="post.title"
+          />
+
+          <button
+            mat-icon-button
+            class="slider-nav-button left"
+            (click)="previousImage(post._id)"
+          >
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            class="slider-nav-button right"
+            (click)="nextImage(post._id, post.imagePath.length)"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+
+          <div class="image-counter" *ngIf="post.imagePath.length > 1">
+            {{ (currentImageIndices[post._id] || 0) + 1 }} /
+            {{ post.imagePath.length }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <mat-card-content class="rental-content">
+        <div class="rental-header-row">
+          <div>
+            <h2 class="rental-title">
+              {{ post.title }}
+            </h2>
+            <div class="rental-location">
+              <mat-icon>place</mat-icon>
+              <span>
+                {{ post.city }}, {{ post.province }}
+              </span>
+            </div>
+          </div>
+
+          <div class="rental-price">
+            <span class="price-main">${{ post.price }}</span>
+            <span class="price-sub">/month</span>
+          </div>
+        </div>
+
+        <div class="rental-meta-tags">
+          <span class="meta-pill">
+            <mat-icon>king_bed</mat-icon>
+            {{ post.bedroom }} bd
+          </span>
+          <span class="meta-pill">
+            <mat-icon>bathtub</mat-icon>
+            {{ post.bathroom }} ba
+          </span>
+          <span class="meta-pill">
+            <mat-icon>house</mat-icon>
+            {{ post.typeOfProperty || 'Unit' }}
+          </span>
+          <span class="meta-pill">
+            <mat-icon>meeting_room</mat-icon>
+            {{ post.rentType }}
+          </span>
+        </div>
+
+        <div class="rental-flags">
+          <span
+            class="flag-pill"
+            [class.flag-on]="post.furnished"
+          >
+            <mat-icon>check_circle_outline</mat-icon>
+            Furnished
+          </span>
+          <span
+            class="flag-pill"
+            [class.flag-on]="post.parkingAvailable"
+          >
+            <mat-icon>directions_car</mat-icon>
+            Parking
+          </span>
+        </div>
+
+        <p class="rental-address">
+          <mat-icon>location_on</mat-icon>
+          <span>
+            {{ post.address }}, {{ post.city }}, {{ post.province }},
+            {{ post.zipcode }}, {{ post.country }}
+          </span>
+        </p>
+
+        <p class="rental-description">
+          <!-- If already expanded OR description is short, show full text -->
+          <ng-container *ngIf="isDescriptionExpanded(post._id) || !isDescriptionLong(post); else truncatedDesc">
+            {{ post.description }}
+          </ng-container>
+
+          <!-- Collapsed view for long descriptions -->
+          <ng-template #truncatedDesc>
+            {{ (post.description || '') | slice:0:descriptionLimit }}
+            <span *ngIf="isDescriptionLong(post)">...</span>
+          </ng-template>
+        </p>
+
+        <!-- Toggle only for long descriptions -->
+        <button
+          *ngIf="isDescriptionLong(post)"
+          type="button"
+          class="description-toggle"
+          (click)="toggleDescription(post._id)"
+        >
+          {{ isDescriptionExpanded(post._id) ? 'Show less' : 'Show more' }}
+        </button>
+
+
+
+
+        <div class="rental-dates">
+          <span class="date-item">
+            <mat-icon>event</mat-icon>
+            Listed: {{ post.dateListed | date: 'MMM d, y' }}
+          </span>
+          <span class="date-item">
+            <mat-icon>event_available</mat-icon>
+            Available: {{ post.dateAvailableForRent | date: 'MMM d, y' }}
+          </span>
+        </div>
+      </mat-card-content>
+
+      <!-- Actions -->
+      <mat-card-actions class="rental-actions">
+        <button
+          *ngIf="userIsAuth && userId === post.creator"
+          mat-stroked-button
+          color="primary"
+          [routerLink]="['/edit', post._id]"
+        >
+          <mat-icon>edit</mat-icon>
+          My listing
+        </button>
+
+        <button
+          *ngIf="userIsAuth && userId !== post.creator"
+          mat-raised-button
+          color="primary"
+          (click)="openInquiryDialog(post.creator, post._id)"
+        >
+          <mat-icon>mail_outline</mat-icon>
+          Make an inquiry
+        </button>
+
+        <button
+          *ngIf="!userIsAuth"
+          mat-stroked-button
+          color="primary"
+          routerLink="/auth/login"
+        >
+          <mat-icon>login</mat-icon>
+          Login to inquire
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Empty state -->
+  <div
+    class="empty-state"
+    *ngIf="!isLoading && posts.length === 0"
+  >
+    <mat-icon class="empty-icon">home_work</mat-icon>
+    <h2>No rentals found</h2>
+    <p>
+      Try adjusting your filters or searching a different city.
+    </p>
+  </div>
+
+   <!-- Paginator -->
+  <div
+    class="paginator-wrapper"
+    *ngIf="posts.length > 0"
+  >
+    <mat-paginator
+      [length]="totalPosts"
+      [pageSize]="postPerPage"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onChangePage($event)"
+    >
+    </mat-paginator>
+  </div>
+</div>

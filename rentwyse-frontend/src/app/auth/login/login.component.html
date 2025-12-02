@@ -1,0 +1,82 @@
+<div class="auth-page">
+  <div class="auth-card-wrapper">
+    <mat-card class="auth-card">
+      <div class="auth-header">
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">
+          Sign in to manage your listings, messages, and viewings.
+        </p>
+      </div>
+
+      <div class="auth-loading" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <form
+        (submit)="onLogin(loginForm)"
+        #loginForm="ngForm"
+        *ngIf="!isLoading"
+        class="auth-form"
+      >
+        <!-- Username -->
+        <mat-form-field appearance="outline" class="auth-field">
+          <mat-label>Username</mat-label>
+          <input
+            matInput
+            type="text"
+            name="username"
+            ngModel
+            #usernameInput="ngModel"
+            required
+            autocomplete="username"
+          />
+          <mat-error *ngIf="usernameInput.invalid && usernameInput.touched">
+            Please enter your username
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Password -->
+        <mat-form-field appearance="outline" class="auth-field">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="hide ? 'password' : 'text'"
+            name="password"
+            ngModel
+            #passwordInput="ngModel"
+            required
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            mat-icon-button
+            matSuffix
+            (click)="togglePasswordVisibility()"
+            aria-label="Toggle password visibility"
+          >
+            <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="passwordInput.invalid && passwordInput.touched">
+            Please enter your password
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Actions -->
+        <button
+          mat-raised-button
+          color="primary"
+          class="auth-primary-btn"
+          type="submit"
+          [disabled]="loginForm.invalid"
+        >
+          Login
+        </button>
+
+        <div class="auth-footer">
+          <span>Don’t have an account? </span>
+          <a routerLink="/auth/signup">Sign up</a>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>

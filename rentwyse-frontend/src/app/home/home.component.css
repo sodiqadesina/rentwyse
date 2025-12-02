@@ -1,0 +1,385 @@
+
+  .fs-x{
+    font-size: 60px;
+  }
+  .post-btn{
+    margin: 80px;
+    display: flex;
+    flex-direction: row-reverse;
+  }
+  .post-rental-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #000000; /* Yellow color from the design */
+    border: none;
+    border-radius: 30px;  /* Gives the rounded corners */
+    font-size: 16px;
+    font-weight: bold;
+    color: #F0BB00; /* Black text color */
+    cursor: pointer;
+    transition: transform 0.2s; /* For a smooth hover effect */
+    text-decoration: none;
+    width: 15%;
+    font-family: sans-serif;
+}
+
+
+
+/* Ensure intro text appears ABOVE clouds */
+.intro-text {
+  position: relative;
+  z-index: 2;
+}
+
+
+
+.house-container {
+    width: 100%;
+    min-height: 420px;
+    position: relative;
+    background-image: url('../../assets/house-img.svg');
+    background-repeat: no-repeat;
+    background-position:right;
+    background-position: right top;
+    
+}
+
+/* Hover effect to slightly enlarge the button */
+.post-rental-btn:hover {
+    transform: scale(1.05);
+}
+
+
+.post-rental-btn:active {
+    transform: scale(1);
+    color: #F0BB00; 
+    background-color: #000000; 
+}
+
+
+/* Cloud Layer */
+.cloud-layer {
+  position: absolute;
+  top: 1;                     
+  left: 0;
+  width: 200%;
+  height: 180px;
+  background: url('../../assets/clouds-pretty.svg') repeat-x;
+  background-size: contain;
+  opacity: 0.35;
+  pointer-events: none;
+  animation: cloudMove 45s linear infinite alternate;
+  z-index: 0;                  /* behind intro-text */
+}
+
+
+/* Animation */
+@keyframes cloudMove {
+  0% {
+    transform: translateX(-10%);
+  }
+  100% {
+    transform: translateX(10%);
+  }
+}
+   
+
+  .home-container {
+    text-align: center;
+    height: 100%;  
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+}
+
+
+
+
+  /* SEARCH BAR */
+.search-bar {
+  width: 70%;
+  background-color: #000;
+  border-radius: 999px;           /* perfect pill */
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Remove default Bootstrap look from input-group-text */
+.search-bar .input-group-text {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Icon */
+.search-bar mat-icon {
+  color: #fff;
+  font-size: 24px;
+}
+
+/* Input itself */
+.search-bar .form-control.search-input {
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+  color: #fff;
+  font-size: 1.2rem;
+  height: 40px;
+  padding-left: 0;
+}
+
+/* Placeholder color */
+.search-bar .form-control.search-input::placeholder {
+  color: #ccc;
+}
+
+/* Focus state */
+.search-bar .form-control.search-input:focus {
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
+  color: #fff;
+}
+
+/* Remove default borders from input-group */
+.search-bar.input-group {
+  border: none;
+}
+  
+
+
+
+/*  */
+
+/* Popular cities section */
+
+/* --- Popular Cities section --- */
+
+.popular-cities-section {
+  text-align: left;
+  padding: 2rem 3rem 1rem;
+}
+
+.popular-c {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.popular-c1 {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+/* Use a dedicated class for the row so we don't fight Bootstrap's .row */
+.popular-cities-row {
+  padding: 0 3rem 3rem;
+}
+
+/* Remove link underline & set base color */
+.popular-cities-row a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* City card styling */
+.city-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.25rem 1rem;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Hover effect */
+.city-card:hover {
+  background-color: #ffffff !important; 
+  transform: translateY(-4px);        
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12); 
+  text-decoration: none;
+}
+
+/* City image container */
+.city-image-container {
+  width: 110px;
+  height: 110px;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.city-image-container img {
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  width: auto;
+}
+
+/* Text inside city card */
+.city-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.2rem 0 0;
+}
+
+.city-link-text {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0.25rem 0 0;
+}
+
+/* Responsiveness */
+/* MID-SCREEN (TABLET / SMALL LAPTOP) */
+@media (min-width: 769px) and (max-width: 1199px) {
+
+  /* Headline size tuned down a bit for mid screens */
+  .fs-x {
+    font-size: 40px;
+    line-height: 1.2;
+  }
+
+  /* Post button area: tighter margin, still aligned to the right */
+  .post-btn {
+    margin: 40px 40px 20px;
+    display: flex;
+    flex-direction: row-reverse;
+  }
+
+  .post-rental-btn {
+    width: 30%;               /* a bit wider so it doesn't look tiny */
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+
+  /* Hero container tweaks so image + text balance nicely */
+  .house-container {
+    min-height: 380px;
+    /* background-size: 55% auto;       smaller image proportion */
+    background-image: none;
+    padding-right: 2rem;
+  }
+
+  /* Cloud layer a bit shorter + slightly lighter */
+   .cloud-layer {
+    display: none;
+  }
+
+  /* Search bar slightly wider & balanced */
+  .search-bar {
+    width: 80%;
+    padding: 8px 18px;
+  }
+
+  .search-bar .form-control.search-input {
+    font-size: 1.05rem;
+  }
+
+  /* Popular cities spacing tuned for mid-width */
+  .popular-cities-section {
+    padding: 2rem 2rem 1rem;
+  }
+
+  .popular-cities-row {
+    padding: 0 2rem 2.5rem;
+  }
+
+  .popular-c {
+    font-size: 2rem;
+  }
+
+  .popular-c1 {
+    font-size: 0.95rem;
+  }
+
+  /* City cards: a little tighter so 3 fit nicely */
+  .city-card {
+    padding: 1.1rem 0.9rem;
+  }
+
+  .city-image-container {
+    width: 95px;
+    height: 95px;
+  }
+}
+
+
+
+/* small screen */
+@media (max-width: 768px) {
+  .popular-cities-section {
+    padding: 2rem 1.5rem 1rem;
+  }
+
+  .popular-c {
+    font-size: 1.8rem;
+  }
+
+  .popular-c1 {
+    font-size: 0.95rem;
+  }
+
+  .popular-cities-row {
+    padding: 0 1.5rem 2rem;
+  }
+
+    /* Turn OFF the big background image on small screens */
+  .house-container {
+    min-height: auto;
+    background-image: none;
+    background-size: auto;
+    background-position: initial;
+    padding: 1.5rem 1.25rem 0;
+  }
+
+  /* Smaller heading size on mobile */
+  .fs-x {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  /* tighten title/subtitle spacing */
+  .intro-text {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Search bar full-width and clean spacing */
+   .search-bar {
+    width: 100%;
+    padding: 8px 16px;
+  }
+
+  .search-bar .form-control.search-input {
+    font-size: 1rem;
+  }
+   .cloud-layer {
+    display: none;
+  }
+    .post-btn {
+        margin: 20px 0 40px;      /* Bring margin down for mobile */
+        display: flex;
+        justify-content: center; /* Center the button */
+        width: 100%;
+    }
+
+    .post-rental-btn {
+        width: 90%;               /* Full-width but with margin */
+        padding: 14px 18px;
+        font-size: 18px;
+        border-radius: 35px;      /* More rounded for mobile aesthetics */
+        text-align: center;
+    }
+}
+

@@ -1,0 +1,489 @@
+<div class="messages-page">
+  <div class="messages-shell">
+    <!-- LEFT: Inbox / conversation list -->
+    <div class="left-pane">
+      <mat-card class="inbox-card">
+        <div class="inbox-header">
+          <div>
+            <h2 class="inbox-title">Inbox</h2>
+            <p class="inbox-subtitle">
+              View all your conversations with renters and owners.
+            </p>
+          </div>
+        </div>
+
+        <!-- Loading on left pane (optional) -->
+        <div class="inbox-loading" *ngIf="isLoading && !conversations.length">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+
+        <!-- Conversation list -->
+        <div
+          class="inbox-list"
+          *ngIf="conversations.length > 0; else noConversations"
+        >
+          <button
+            type="button"
+            *ngFor="let conversation of conversations"
+            class="inbox-item"
+            [class.active]="selectedConversation?._id === conversation._id"
+            (click)="selectConversation(conversation); markConversationAsRead(conversation._id)"
+          >
+            <!-- Avatar -->
+            <div class="inbox-avatar">
+              {{ conversation.otherParticipantUsername?.charAt(0) | uppercase }}
+            </div>
+
+            <!-- Conversation summary -->
+            <div class="inbox-meta">
+              <div class="inbox-top-row">
+                <span class="inbox-name">
+                  {{ conversation.otherParticipantUsername }}
+                </span>
+
+                <span
+                  *ngIf="conversation.unreadCount > 0 && !conversationReadStatus[conversation._id]"
+                  matBadge="{{ conversation.unreadCount }}"
+                  matBadgeColor="warn"
+                  class="inbox-badge-host"
+                ></span>
+              </div>
+
+              <div class="inbox-bottom-row">
+                <span class="inbox-preview">
+                  <ng-container *ngIf="conversation.postId?.title; else noTitle">
+                    {{ conversation.postId.title }}
+                  </ng-container>
+                  <ng-template #noTitle>
+                    Conversation about a listing
+                  </ng-template>
+                </span>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <ng-template #noConversations>
+          <p class="empty-left-text" *ngIf="!isLoading">
+            You have no conversations yet.
+          </p>
+        </ng-template>
+      </mat-card>
+    </div>
+
+    <!-- RIGHT: Conversation + listing + actions -->
+    <div class="right-pane">
+      <!-- Global spinner for right pane -->
+      <div class="right-loading-overlay" *ngIf="isLoading && selectedConversation">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <ng-container *ngIf="selectedConversation; else noConversationSelected">
+        <!-- Conversation header -->
+        <!-- <mat-card class="conv-header-card">
+          <div class="conv-header-main">
+            <div class="conv-header-avatar">
+              {{ selectedConversation.otherParticipantUsername?.charAt(0) | uppercase }}
+            </div>
+            <div>
+              <h2 class="conv-title">
+                {{ selectedConversation.otherParticipantUsername }}
+              </h2>
+              <p class="conv-subtitle" *ngIf="selectedConversation.postId">
+                Regarding:
+                <strong>{{ selectedConversation.postId.title }}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="conv-header-badge"
+            *ngIf="selectedConversation.postId?.city"
+          >
+            <mat-icon>place</mat-icon>
+            <span>
+              {{ selectedConversation.postId.city }},
+              {{ selectedConversation.postId.province }}
+            </span>
+          </div>
+        </mat-card> -->
+
+        <!-- Main two-column layout: Listing + Chat -->
+        <div class="conv-main-grid">
+          <!-- Listing snapshot -->
+          <mat-card
+            class="listing-card"
+            *ngIf="selectedConversation.postId"
+          >
+            <div class="listing-media" *ngIf="selectedConversation.postId.imagePath?.length">
+              <div class="listing-image-wrapper">
+                <img
+                  [src]="selectedConversation.postId.imagePath[currentImageIndex]"
+                  [alt]="selectedConversation.postId.title"
+                />
+
+                <button
+                  mat-icon-button
+                  class="listing-nav left"
+                  (click)="previousImage()"
+                >
+                  <mat-icon>chevron_left</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  class="listing-nav right"
+                  (click)="nextImage(selectedConversation.postId.imagePath.length)"
+                >
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+
+                <div
+                  class="listing-image-counter"
+                  *ngIf="selectedConversation.postId.imagePath.length > 1"
+                >
+                  {{ currentImageIndex + 1 }} /
+                  {{ selectedConversation.postId.imagePath.length }}
+                </div>
+              </div>
+            </div>
+
+            <div class="listing-body">
+              <div class="listing-header-row">
+                <div>
+                  <h3 class="listing-title">
+                    {{ selectedConversation.postId.title }}
+                  </h3>
+                  <p class="listing-location">
+                    <mat-icon>place</mat-icon>
+                    {{ selectedConversation.postId.address }},
+                    {{ selectedConversation.postId.city }},
+                    {{ selectedConversation.postId.province }}
+                  </p>
+                </div>
+
+                <div class="listing-price">
+                  <span class="price-main">
+                    ${{ selectedConversation.postId.price }}
+                  </span>
+                  <span class="price-sub">/month</span>
+                </div>
+              </div>
+
+              <div class="listing-tags">
+                <span class="pill">
+                  <mat-icon>king_bed</mat-icon>
+                  {{ selectedConversation.postId.bedroom }} bed
+                </span>
+                <span class="pill">
+                  <mat-icon>bathtub</mat-icon>
+                  {{ selectedConversation.postId.bathroom }} bath
+                </span>
+                <span class="pill">
+                  <mat-icon>apartment</mat-icon>
+                  {{ selectedConversation.postId.typeOfProperty }}
+                </span>
+                <span class="pill">
+                  <mat-icon>meeting_room</mat-icon>
+                  {{ selectedConversation.postId.rentType }}
+                </span>
+              </div>
+
+              <p class="listing-desc">
+                {{ selectedConversation.postId.description }}
+              </p>
+
+              <div class="listing-meta-grid">
+                <div class="meta-item">
+                  <label>Listed</label>
+                  <span>
+                    {{ selectedConversation.postId.dateListed | date:'MMM d, y' }}
+                  </span>
+                </div>
+
+                <div class="meta-item">
+                  <label>Available from</label>
+                  <span>
+                    {{
+                      selectedConversation.postId.dateAvailableForRent
+                        | date:'MMM d, y'
+                    }}
+                  </span>
+                </div>
+
+                <div class="meta-item">
+                  <label>Furnished</label>
+                  <span>
+                    {{ selectedConversation.postId.furnished ? 'Yes' : 'No' }}
+                  </span>
+                </div>
+
+                <div class="meta-item">
+                  <label>Parking</label>
+                  <span>
+                    {{
+                      selectedConversation.postId.parkingAvailable
+                        ? 'Available'
+                        : 'Not available'
+                    }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </mat-card>
+
+          <!-- Chat card -->
+          <mat-card class="chat-card">
+            <div class="chat-header">
+              <h3 class="section-title">Messages</h3>
+            </div>
+
+            <!-- Messages list -->
+            <div
+              class="chat-body"
+              #messagesContainer
+              *ngIf="!isLoading; else messagesLoading"
+            >
+              <div
+                *ngFor="let message of selectedConversationMessages"
+                class="chat-row"
+                [ngClass]="{
+                  'align-right': message.sender._id === currentUserId
+                }"
+              >
+                <div
+                  class="chat-bubble"
+                  [ngClass]="message.sender._id === currentUserId ? 'bubble-me' : 'bubble-them'"
+                >
+                  <span class="chat-text">
+                    {{ message.sender.username }}:
+                    {{ message.content }}
+                  </span>
+                  <span class="chat-time">
+                    {{ formatDate(message.createdAt) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <ng-template #messagesLoading>
+              <div class="chat-loading">
+                <mat-spinner diameter="28"></mat-spinner>
+              </div>
+            </ng-template>
+
+            <!-- Composer -->
+            <form
+              class="chat-composer"
+              [formGroup]="messageForm"
+              (ngSubmit)="onSendMessage()"
+            >
+              <mat-form-field appearance="outline" class="composer-input">
+                <mat-label>Type a message</mat-label>
+                <textarea
+                  matInput
+                  rows="2"
+                  placeholder="Ask a question, confirm a viewing time, or share details…"
+                  formControlName="content"
+                ></textarea>
+              </mat-form-field>
+
+              <button
+                mat-raised-button
+                color="primary"
+                class="composer-send"
+                type="submit"
+                [disabled]="messageForm.invalid || isLoading"
+              >
+                <mat-icon>send</mat-icon>
+                Send
+              </button>
+            </form>
+          </mat-card>
+        </div>
+
+        <!-- Viewing + Documents combined area -->
+        <div class="conv-meta-grid">
+          <!-- Viewing card -->
+          <mat-card class="viewing-card">
+            <div class="viewing-header-row">
+              <div>
+                <h3 class="section-title">Viewing date</h3>
+                <p class="section-subtitle">
+                  Set or update a viewing time for this rental.
+                </p>
+              </div>
+
+              <div
+                class="viewing-chip"
+                *ngIf="selectedConversation.viewingDate"
+              >
+                <mat-icon>event</mat-icon>
+                {{ selectedConversation.viewingDate | date:'MMM d, y, h:mm a' }}
+              </div>
+            </div>
+
+            <p
+              class="viewing-empty subtle"
+              *ngIf="!selectedConversation.viewingDate"
+            >
+              <mat-icon>event_busy</mat-icon>
+              No viewing date set yet.
+            </p>
+
+            <form
+              class="viewing-form"
+              [formGroup]="viewingDateForm"
+              (ngSubmit)="onSetViewingDate()"
+              *ngIf="isUserPostCreator()"
+            >
+              <mat-form-field appearance="fill">
+                <mat-label>Viewing date</mat-label>
+                <input
+                  matInput
+                  [matDatepicker]="datePicker"
+                  formControlName="viewingDate"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="datePicker"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #datePicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Viewing time</mat-label>
+                <input
+                  matInput
+                  type="time"
+                  formControlName="viewingTime"
+                />
+              </mat-form-field>
+
+              <button mat-raised-button type="submit">
+                {{ selectedConversation.viewingDate ? 'Update' : 'Set' }} viewing
+                date
+              </button>
+            </form>
+          </mat-card>
+
+          <!-- Documents card -->
+          <mat-card class="documents-card">
+            <h3 class="section-title">Documents</h3>
+            <p class="section-subtitle">
+              Exchange agreement files with the other party securely.
+            </p>
+
+            <div class="documents-columns">
+              <!-- Agreement -->
+              <div class="documents-section">
+                <h4>
+                  <mat-icon>description</mat-icon>
+                  Agreement
+                </h4>
+
+                <p
+                  class="documents-empty"
+                  *ngIf="!selectedConversation.agreementDocuments?.length"
+                >
+                  No agreement uploaded yet.
+                </p>
+
+                <div
+                  class="document-row"
+                  *ngFor="let doc of selectedConversation.agreementDocuments"
+                >
+                  <button
+                    type="button"
+                    class="document-link"
+                    (click)="onDownloadDocument(doc)"
+                  >
+                    <mat-icon>picture_as_pdf</mat-icon>
+                    <span>{{ doc }}</span>
+                  </button>
+                  <button
+                    mat-stroked-button
+                    color="warn"
+                    *ngIf="isUserPostCreator()"
+                    (click)="onDeleteDocument(doc, 'agreementDocument')"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              <!-- Signed agreement -->
+              <div class="documents-section">
+                <h4>
+                  <mat-icon>task_alt</mat-icon>
+                  Signed agreement
+                </h4>
+
+                <p
+                  class="documents-empty"
+                  *ngIf="!selectedConversation.signedAgreementDocuments?.length"
+                >
+                  No signed agreement uploaded yet.
+                </p>
+
+                <div
+                  class="document-row"
+                  *ngFor="let doc of selectedConversation.signedAgreementDocuments"
+                >
+                  <button
+                    type="button"
+                    class="document-link"
+                    (click)="onDownloadDocument(doc)"
+                  >
+                    <mat-icon>picture_as_pdf</mat-icon>
+                    <span>{{ doc }}</span>
+                  </button>
+                  <button
+                    mat-stroked-button
+                    color="warn"
+                    *ngIf="isUserPostCreator()"
+                    (click)="onDeleteDocument(doc, 'signedAgreementDocument')"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <form
+              class="upload-form"
+              [formGroup]="documentForm"
+              (ngSubmit)="onUploadDocuments()"
+            >
+              <label class="upload-label">
+                <mat-icon>upload_file</mat-icon>
+                <span>Select files</span>
+                <input
+                  type="file"
+                  formControlName="documents"
+                  multiple
+                  (change)="onFilePicked($event)"
+                />
+              </label>
+
+              <button mat-raised-button type="submit">
+                Upload
+              </button>
+            </form>
+          </mat-card>
+        </div>
+      </ng-container>
+
+      <!-- When no conversation is selected -->
+      <ng-template #noConversationSelected>
+        <div class="empty-right-card">
+          <mat-icon class="empty-right-icon">chat_bubble_outline</mat-icon>
+          <h2>Select a conversation</h2>
+          <p>
+            Choose a thread from the inbox on the left to view messages,
+            listing details, and documents.
+          </p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

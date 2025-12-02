@@ -1,0 +1,59 @@
+
+
+
+<div class=" home-container  d-flex flex-column justify-content-between">
+    
+<div class="post-btn">
+    <a routerLink="/create" class="btn badge text-wrap  mb-3 post-rental-btn">Post a Rental</a> 
+    <div class="cloud-layer"></div>
+</div>
+
+<div class="house-container">
+    <div class="intro-text mb-5">
+        <h1 class="home-title px-5 fs-x text-start">Looking For A Place To Rent In Ontario?</h1>
+        <h1 class="home-subtitle fs-x px-5 py-3 text-start">We Are Here To Help!</h1>
+    </div>
+        
+     
+<div class="text-start pt-5 m-5">
+  <div class="search-bar input-group">
+    <span class="input-group-text">
+      <mat-icon>search</mat-icon>
+    </span>
+    <input
+      id="autocomplete"
+      type="text"
+      class="form-control search-input"
+      placeholder="Search City, Neighborhood, Address"
+    />
+  </div>
+</div>
+
+
+    
+<div class="popular-cities-section pt-5">
+  <h1 class="popular-c">Popular Cities</h1>
+  <h2 class="popular-c1">Find Your Next Apartment in Ontario</h2>
+</div>
+
+<div class="row popular-cities-row">
+  <div class="col-md-4 mb-4" *ngFor="let city of ['Toronto', 'Mississauga', 'Brampton']">
+    <a
+      class="city-card"
+      (click)="onCitySelected(city.toLowerCase())"
+    >
+      <div class="city-image-container">
+        <img
+          [src]="'../../assets/' + city.toLowerCase() + '.svg'"
+          alt="{{ city }}"
+        />
+      </div>
+      <p class="city-name">{{ city }}</p>
+      <p class="city-link-text">View rentals in {{ city }}</p>
+    </a>
+  </div>
+</div>
+
+
+    
+</div>

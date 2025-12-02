@@ -1,0 +1,32 @@
+/* inquiry-dialog.component.css */
+mat-dialog-content {
+    background-color: rgba(255, 255, 255, 0.95); /* Semi-transparent background */
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  mat-dialog-title {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 24px;
+  }
+  
+  .message-field {
+    width: 100%; /* Full width text area */
+  }
+  
+  textarea {
+    min-height: 100px; /* Minimum height for the text area */
+    width: 100%;
+  }
+  
+  .mat-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  
+  button {
+    margin-right: 0; /* Align the button to the right */
+  }
+  

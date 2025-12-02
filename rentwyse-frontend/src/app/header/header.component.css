@@ -1,0 +1,148 @@
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 1000;  /* stay above page content */
+}
+
+
+.custom-toolbar {
+  background: #000000;
+  padding: 0;
+  width: 100%;
+}
+
+mat-toolbar {
+  height: 100%;
+}
+
+.cont {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 20px;
+  height: 15%;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.logo {
+  width: 150px;
+  height: auto;
+}
+
+/* DESKTOP NAV */
+.nav-list {
+  display: flex;
+  gap: 10px;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-list a,
+.nav-list button {
+  color: #ffffff;
+  text-transform: none;         /* no ALL CAPS */
+  font-weight: 500;
+}
+
+/* Mobile menu icon (hamburger) */
+.menu-icon {
+  display: none;                 /* hidden on desktop */
+  background-color: #000000;
+  border: none;
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  outline: none;
+}
+
+.menu-icon mat-icon {
+  color: #ffffff;
+  font-size: 28px;
+}
+
+.menu-icon:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.menu-icon:hover {
+  background-color: #111111;
+}
+
+/* ACTIVE LINK (both desktop & mobile) */
+.active-link {
+  color: #ffc107 !important;
+}
+
+/* ---------------- MOBILE / SMALL SCREEN ---------------- */
+@media (max-width: 768px) {
+
+  /* Turn horizontal nav into dropdown panel */
+  .nav-list {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: #1A1A1A;
+    flex-direction: column;
+    width: 230px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    padding: 8px 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    border-radius: 0 0 0 12px;
+  }
+
+  .nav-list.active {
+    transform: translateX(0);
+  }
+
+  /* Make items full-width, tappable, left-aligned */
+  .nav-list li {
+    width: 100%;
+  }
+
+  .nav-list a,
+  .nav-list button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 18px;
+    color: #ffffff;
+    text-decoration: none;
+    background: none;
+    border: none;
+    border-radius: 0;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+  }
+
+  /* Hover / focus state for menu items */
+  .nav-list a:hover,
+  .nav-list button:hover {
+    color: #ffc107 !important;       /* highlight text only */
+    background-color: transparent; 
+  }
+
+  /* Keep active route highlighted even in menu */
+  .nav-list a.active-link,
+  .nav-list button.active-link {
+    color: #ffc107 !important;
+  }
+
+  /* Show the hamburger icon on small screens */
+  .menu-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+  }
+}

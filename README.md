@@ -29,18 +29,20 @@ Each folder includes its own in-depth documentation — this root README gives t
 
 1. High-Level System Architecture
 
-
+   ![Architecture](images/System-Arch-Rentwyse.png)
 
 2. Backend Module Architecture (Overview)
 
-
+   ![Architecture](images/Backend-Module-Architecture.png)
 
 3. Frontend Architecture (Overview)
 
+   ![Architecture](images/frontend-architecture-diagram.png)
 
 
 4. Application Workflow (End-to-End Lifecycle)
 
+  ![Architecture](images/Workflow-Sequence-Diagram.png)
 
 # Project Structure (Monorepo)
 

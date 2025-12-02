@@ -13,48 +13,35 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: windows-latest
+  build-and-deploy:
+    runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      id-token: write      # required for azure/login
+      contents: read       # required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
 
-      - name: npm install, build, and test (backend)
+      - name: Install backend dependencies
         working-directory: ./rentwyse-backend
         env:
           NODE_ENV: production
         run: |
           npm install
-          npm run build --if-present
-          # If tests depend on local/dev env, comment this out for now:
-          # npm run test --if-present
-      
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-app
-          path: ./rentwyse-backend
+          # If Jest isn't fully configured yet and causes failures, you can comment this out:
+          # npm test
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      - name: Create deployment zip from backend folder
+        run: |
+          cd rentwyse-backend
+          zip -r ../backend.zip .
 
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-app
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -62,11 +49,9 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2FE1410E553440A798C60A2830CFA0B9 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7CB6D3E1ACBC4AC195AC9A04D0288070 }}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy backend zip to Azure Web App
         uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
         with:
           app-name: 'rent-wyse-backend'
           slot-name: 'Production'
-          # IMPORTANT: deploy the current directory (artifact root), not ./rentwyse-backend
-          package: .
+          package: backend.zip

@@ -20,7 +20,9 @@ const cors = require("cors");
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
-dotenv.config({ path: ".env" });
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: '.env' });
+}
 
 require("./config/passport-config")(passport); 
 

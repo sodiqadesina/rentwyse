@@ -49,41 +49,18 @@ app.use("/images", express.static(path.join("images")));
 
 // Setting up headers for CORES
 // CORS configuration
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps / curl / Postman)
-    if (!origin) return callback(null, true);
+//const cors = require("cors");
 
-    const allowedOrigins = [
-      "http://localhost:4200",
-      "http://127.0.0.1:4200",
-      "https://rentwise-client-75315342fb4d.herokuapp.com",
-      
-    ];
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(null, false);
-    }
-  },
+// TEMPORARY: Allow ALL origins
+app.use(cors({
+  origin: "*",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "X-Requested-With",
-    "Accept",
-    "Origin",
-  ],
-  credentials: true,
-  optionsSuccessStatus: 204,
-};
+  allowedHeaders: "*",
+  credentials: false // cannot use "*" with credentials:true
+}));
 
-// Use CORS for all routes
-app.use(cors(corsOptions));
-
-// Explicitly handle preflight requests
-app.options("*", cors(corsOptions));
+// Handle preflight
+app.options("*", cors());
 
 
 //passport and sessions (no longer needed has we would be using jwt)

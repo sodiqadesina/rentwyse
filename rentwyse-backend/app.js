@@ -49,18 +49,41 @@ app.use("/images", express.static(path.join("images")));
 
 // Setting up headers for CORES
 // CORS configuration
-//const cors = require("cors");
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps / curl / Postman)
+    if (!origin) return callback(null, true);
 
-// TEMPORARY: Allow ALL origins
-app.use(cors({
-  origin: "*",
+    const allowedOrigins = [
+      "http://localhost:4200",
+      "http://127.0.0.1:4200",
+      "https://rentwyse-jkw3.onrender.com",
+      
+    ];
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-  allowedHeaders: "*",
-  credentials: false // cannot use "*" with credentials:true
-}));
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+  ],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
 
-// Handle preflight
-app.options("*", cors());
+// Use CORS for all routes
+app.use(cors(corsOptions));
+
+// Explicitly handle preflight requests
+app.options("*", cors(corsOptions));
 
 
 //passport and sessions (no longer needed has we would be using jwt)

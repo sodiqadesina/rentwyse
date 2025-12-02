@@ -11,7 +11,7 @@ import { environment } from '../../environments/environment';
 })
 export class SocketService {
   private socket!: Socket;
-  private readonly serverUrl = "https://rent-wyse-backend-g6fke4h3fmbdhzgr.canadacentral-01.azurewebsites.net"; 
+  private readonly serverUrl = "https://rentwyse.onrender.com/"; 
 
   constructor(private notificationService: NotificationService) {
     // Don't connect here

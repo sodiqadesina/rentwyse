@@ -9,7 +9,7 @@ module.exports = {
   init: (httpServer) => {
     io = new Server(httpServer, {
       cors: {
-        origin: "*",
+        origin: "https://rentwyse-jkw3.onrender.com",
         methods: ["GET", "POST"],
         allowedHeaders: ["my-custom-header"],
         credentials: true,

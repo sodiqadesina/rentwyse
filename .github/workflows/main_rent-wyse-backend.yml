@@ -14,10 +14,10 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
-      id-token: write      # required for azure/login
-      contents: read       # required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -28,19 +28,19 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: Install backend dependencies
+      - name: Install backend dependencies (Windows)
         working-directory: ./rentwyse-backend
         env:
           NODE_ENV: production
         run: |
           npm install
-          # If Jest isn't fully configured yet and causes failures, you can comment this out:
+          # If Jest isn't fully configured yet and causes failures, comment this out:
           # npm test
 
-      - name: Create deployment zip from backend folder
+      - name: Create deployment zip from backend folder (Windows)
         run: |
           cd rentwyse-backend
-          zip -r ../backend.zip .
+          powershell Compress-Archive -Path * -DestinationPath ../backend.zip -Force
 
       - name: Login to Azure
         uses: azure/login@v2

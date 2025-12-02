@@ -48,24 +48,44 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/images", express.static(path.join("images")));
 
 // Setting up headers for CORES
-app.use(
-  cors({
-    origin: [
-      "http://localhost:4200",                                // Local frontend (React dev)
+// CORS configuration
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps / curl / Postman)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      "http://localhost:4200",
       "http://127.0.0.1:4200",
-      "https://rentwise-client-75315342fb4d.herokuapp.com",   // Deployed frontend
-    ],
-    methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Requested-With",
-      "Accept",
-      "Origin",
-    ],
-    credentials: true, // IMPORTANT for socket.io + JWT
-  })
-);
+      "https://rentwise-client-75315342fb4d.herokuapp.com",
+      // add Azure frontend URL here when you deploy it, e.g.:
+      // "https://rent-wyse-frontend.azurewebsites.net",
+    ];
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+  ],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+// Use CORS for all routes
+app.use(cors(corsOptions));
+
+// Explicitly handle preflight requests
+app.options("*", cors(corsOptions));
+
 
 //passport and sessions (no longer needed has we would be using jwt)
 //routes

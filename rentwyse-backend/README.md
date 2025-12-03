@@ -1,4 +1,4 @@
-# rentwyse
+# rentwyse 🚧 👷 🔨 🛠️
 
 - Note that i have connected an online database so you have some data to work with
 
@@ -15,3 +15,12 @@
 - added an images file to store images received form the newPost in the posts controller file
 
 - still using bycrpt but passport.js isn't required anymore
+
+
+  /!\ 
+ /___\   UNDER CONSTRUCTION
+(_____)
+
+⚠️
+🚧
+🦺

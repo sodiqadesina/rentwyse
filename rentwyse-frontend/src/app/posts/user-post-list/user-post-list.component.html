@@ -138,9 +138,29 @@
           </div>
         </div>
 
-        <p class="listing-description">
-          {{ post.description }}
-        </p>
+        <div class="listing-description">
+          <p class="description-text">
+            {{
+              isDescriptionExpanded(post._id)
+                ? post.description
+                : (post.description | slice: 0:180)
+            }}
+            <span
+              *ngIf="(post.description?.length || 0) > 180 && !isDescriptionExpanded(post._id)"
+              >...</span
+            >
+          </p>
+
+         <button
+            *ngIf="(post.description?.length || 0) > 180"
+            type="button"
+            class="description-toggle"
+            (click)="toggleDescription(post._id)"
+          >
+            {{ isDescriptionExpanded(post._id) ? 'Show less' : 'Show more' }}
+          </button>
+        </div>
+
 
         <div class="listing-dates-row">
           <div class="date-item">

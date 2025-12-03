@@ -84,6 +84,18 @@ onChangePage(pageData: PageEvent){
 
 }
 
+// Track which descriptions are expanded per post
+expandedDescriptions: { [postId: string]: boolean } = {};
+
+toggleDescription(postId: string): void {
+  this.expandedDescriptions[postId] = !this.expandedDescriptions[postId];
+}
+
+isDescriptionExpanded(postId: string): boolean {
+  return !!this.expandedDescriptions[postId];
+}
+
+
 
 onDelete(postId: string){
   this.isLoading = true;

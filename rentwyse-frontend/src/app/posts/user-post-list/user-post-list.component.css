@@ -281,9 +281,29 @@ mat-spinner {
 
 /* Description */
 .listing-description {
+  margin-top: 0.5rem;
+}
+
+.description-text {
+  margin: 0;
   font-size: 0.9rem;
-  color: #555;
-  margin: 0.3rem 0 0.5rem;
+  line-height: 1.4;
+  color: #4b5563;
+}
+
+.description-toggle {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #000;
+  cursor: pointer;
+}
+
+.description-toggle:hover {
+  text-decoration: underline;
 }
 
 /* Dates row */

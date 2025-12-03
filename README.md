@@ -85,4 +85,51 @@ Rent-wyse/
       - Mongoose / MongoDB
       
       - Nodemailer (email verification)
+
+# 🛠️ Getting Started (Development)
+  
+    1. Clone the repository
+      ```
+      cd rentwyse-backend
+      npm install
+      ```
+
+    2. Backend Setup
+
+      - Create a .env file:
+        ```
+        MONGO_ATLAS_CONNECTION=your_db_uri
+        JWT_KEY=your_jwt_key
+        EMAIL_USER=your_email
+        EMAIL_PASS=your_app_password
+        ```
+      - Start backend:
+      ```
+        npm run dev
+        # or
+        nodemon server.js
+
+      ```
+        Runs on http://localhost:5500
+
+    3. Frontend Setup
+      ```
+      cd rentwyse-frontend
+      npm install
+      ng serve
+      ```
+      Open: http://localhost:4200
+      
+# Future Enhancements
+
+  - Add dedicated admin dashboard
+
+  - Integrate full PayPal payment flow
+
+  - Add listing analytics (views, saves, leads)
+
+  - Add image compression + preview processing
+
+  - Add push notifications (Firebase Cloud Messaging)
+
       

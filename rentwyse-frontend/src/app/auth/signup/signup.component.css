@@ -1,97 +1,86 @@
-/* Basic styles */
+/* Wrapper between header and footer */
+.auth-page {
+  padding: 2rem 1rem 3rem;   /* small space under header, some space above footer */
+  box-sizing: border-box;
+  display: block;           
+}
+
+/* Horizontally centered card, not vertically centered */
+.auth-card-wrapper {
+  max-width: 500px;
+  margin: 0 auto;            /* center horizontally */
+}
+
+/* Card styles */
+.auth-card,
 mat-card {
-    max-width: 500px;
-    width: 100%;
-    margin: 2rem auto;
-    padding: 2rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
+  width: 100%;
+  padding: 2rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  background: #fff;
 }
 
+/* Loading spinner */
 mat-spinner {
-    margin: auto;
+  margin: 2rem auto;
 }
 
+/* Form layout */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.auth-field,
 mat-form-field {
-    width: 100%;
-    margin-bottom: 1.5rem;
+  width: 100%;
 }
 
-.btn {
-    text-align: center;
-    width: 100%;
-}
-
+/* Primary button */
+.auth-primary-btn,
 button[mat-raised-button] {
-    padding-left: 2rem;
-    padding-right: 2rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    background-color: black;
-    color: aliceblue;
-    width: 100%; /* Match login button full width */
+  width: 100%;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: black;
+  color: aliceblue;
 }
 
+/* Footer text under form */
+.auth-footer {
+  padding-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Small enhancements */
 .mat-form-field.mat-focused .mat-form-field-underline .mat-form-field-ripple {
-    background-color: #1976D2;
+  background-color: #1976D2;
 }
 
 mat-icon {
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.auth-footer {
-    padding-top: 1rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
 mat-icon:hover {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
 
-/* Responsive styles */
+/* Responsive tweaks */
 @media only screen and (max-width: 600px) {
-    mat-card {
-        padding: 1rem;
-    }
-
-    button[mat-raised-button] {
-        width: 100%;
-    }
+  .auth-card,
+  mat-card {
+    padding: 1.5rem;
+  }
 }
 
 @media only screen and (min-width: 601px) and (max-width: 900px) {
-    mat-card {
-        padding: 1.5rem;
-    }
-
-    button[mat-raised-button] {
-        width: auto;
-    }
-}
-
-/* Desktop behavior: page should NOT scroll */
-@media only screen and (min-width: 901px) {
-
-    /* Lock the entire page height so the window never scrolls */
-    :host {
-        display: block;
-        height: 100vh;     /* Component fills viewport */
-        overflow: hidden;  /* Prevent page scrolling */
-    }
-
-    /* Card stays centered and becomes the only scrollable element */
-    mat-card {
-        max-height: calc(100vh - 4rem); /* Respect 2rem margin top/bottom */
-        overflow-y: auto;               /* Only card may scroll (no page scroll) */
-    }
-
-    /* Remove scrollbar completely */
-    mat-card::-webkit-scrollbar {
-        display: none;
-    }
-
-    mat-card {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;     /* Firefox */
-    }
+  .auth-card,
+  mat-card {
+    padding: 1.75rem;
+  }
 }

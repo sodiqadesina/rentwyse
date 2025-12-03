@@ -132,4 +132,8 @@ Rent-wyse/
 
   - Add push notifications (Firebase Cloud Messaging)
 
+# Demo:
+  - visit https://rentwyse-jkw3.onrender.com for a demo
+  - use testuser1 and/or testuser2 as username and password = Password123! to login 
+  - happy testing 
       

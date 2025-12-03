@@ -42,7 +42,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
   isViewingConversation = false; 
   renegotiationForm!: FormGroup;
   renegotiatedPrice: number = 5;
-
+  readonly listingDescriptionWordLimit = 30;
 
 
 
@@ -88,8 +88,15 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
             });
       }
 
-
-            
+      truncateDescription(desc?: string | null): string {
+        if (!desc) return '';
+        const words = desc.trim().split(/\s+/);
+        if (words.length <= this.listingDescriptionWordLimit) {
+          return desc;
+        }
+        return words.slice(0, this.listingDescriptionWordLimit).join(' ') + '...';
+      }
+                  
       // initiatePayPalTransaction() {
       //   if (this.selectedConversation && this.selectedConversation._id) {
       //     this.messageService.createPayPalTransaction(this.selectedConversation._id)

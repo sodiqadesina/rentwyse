@@ -189,9 +189,8 @@
               </div>
 
               <p class="listing-desc">
-                {{ selectedConversation.postId.description }}
+                {{ truncateDescription(selectedConversation.postId?.description) }}
               </p>
-
               <div class="listing-meta-grid">
                 <div class="meta-item">
                   <label>Listed</label>

@@ -8,6 +8,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { InquiryDialogComponent } from '../../messaging/Inquiry-dialog/inquiry-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { Overlay } from '@angular/cdk/overlay';
+import { Router } from '@angular/router';
+import { MessageService } from 'src/app/messaging/messaging.service';
 
 
 @Component({
@@ -37,31 +39,52 @@ export class PostListComponent implements OnInit, OnDestroy {
   filterMinPrice!: number;
   filterMaxPrice!: number;
   descriptionExpanded: { [postId: string]: boolean } = {};
+  conversationsByPostId: { [postId: string]: any } = {};
 
 
-  constructor(public postsService: PostsService, private authService: AuthService, public dialog: MatDialog, private route: ActivatedRoute, private overlay: Overlay){}
+
+  constructor(public postsService: PostsService, private authService: AuthService, public dialog: MatDialog, private route: ActivatedRoute, private overlay: Overlay,  private messageService: MessageService, private router: Router){}
 
 
-ngOnInit(){
+ngOnInit() {
   this.isLoading = true;
-  // this.postsService.getPosts(this.postPerPage, this.currentPage,);
-  this.userId = this.authService.getUserId();
-  this.postsSub = this.postsService.getPostUpdateListener().subscribe((postData: {posts: post[], postCount: number}) => {
-    this.isLoading = false;
-    this.totalPosts = postData.postCount;
-    this.posts = postData.posts;
-    console.log(this.posts)
-    console.log(this.userId)
-  });
-  this.userIsAuth = this.authService.getIsAuth();
-  this.authStatusSub = this.authService.getAuthStatusListener().subscribe(isAuthenticated =>{
-    this.userIsAuth = isAuthenticated;
-    this.userId = this.authService.getUserId();
-    console.log(this.userId)
-  })
 
-  //Handling paramited  reroute
-  this.route.queryParams.subscribe(params => {
+  // Set initial user
+  this.userId = this.authService.getUserId();
+
+  // Listen for posts
+  this.postsSub = this.postsService
+    .getPostUpdateListener()
+    .subscribe((postData: { posts: post[]; postCount: number }) => {
+      this.isLoading = false;
+      this.totalPosts = postData.postCount;
+      this.posts = postData.posts;
+      console.log(this.posts);
+      console.log(this.userId);
+    });
+
+  // Auth state + conversations
+  this.userIsAuth = this.authService.getIsAuth();
+  if (this.userIsAuth) {
+    this.loadUserConversations();
+  }
+
+  this.authStatusSub = this.authService
+    .getAuthStatusListener()
+    .subscribe((isAuthenticated) => {
+      this.userIsAuth = isAuthenticated;
+      this.userId = this.authService.getUserId();
+      console.log(this.userId);
+
+      if (this.userIsAuth) {
+        this.loadUserConversations();
+      } else {
+        this.conversationsByPostId = {};
+      }
+    });
+
+  // Handling param-based reroute / filters
+  this.route.queryParams.subscribe((params) => {
     const city = params['city'];
     if (city) {
       this.filterCity = city;
@@ -71,6 +94,7 @@ ngOnInit(){
     }
   });
 }
+
 
 applyFilters() {
   this.isLoading = true;
@@ -127,6 +151,40 @@ toggleDescription(postId: string): void {
 
 isDescriptionLong(post: post): boolean {
   return ((post.description || '').length > this.descriptionLimit);
+}
+
+private loadUserConversations(): void {
+  if (!this.userIsAuth || !this.userId) {
+    this.conversationsByPostId = {};
+    return;
+  }
+
+  this.messageService.getAllConversationsForUser(this.userId).subscribe({
+    next: (conversations: any[]) => {
+      const map: { [postId: string]: any } = {};
+      conversations.forEach((c: any) => {
+        const postId = c.postId?._id || c.postId;  // supports populated or raw ID
+        if (postId) {
+          map[postId] = c;
+        }
+      });
+      this.conversationsByPostId = map;
+    },
+    error: (err) => {
+      console.error('Failed to load conversations for user', err);
+      this.conversationsByPostId = {};
+    }
+  });
+}
+
+hasConversationForPost(postId: string): boolean {
+  return !!this.conversationsByPostId[postId];
+}
+
+viewMessagesForPost(postId: string): void {
+  const convo = this.conversationsByPostId[postId];
+  if (!convo) return;
+  this.router.navigate(['/messages', convo._id]);
 }
 
 

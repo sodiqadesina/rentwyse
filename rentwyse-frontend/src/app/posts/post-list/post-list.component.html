@@ -258,19 +258,23 @@
       </mat-card-content>
 
       <!-- Actions -->
-      <mat-card-actions class="rental-actions">
-        <button
-          *ngIf="userIsAuth && userId === post.creator"
-          mat-stroked-button
-          color="primary"
-          [routerLink]="['/edit', post._id]"
-        >
-          <mat-icon>edit</mat-icon>
-          My listing
-        </button>
+    <mat-card-actions class="rental-actions">
+      <!-- Owner: manage listing -->
+      <button
+        *ngIf="userIsAuth && userId === post.creator"
+        mat-stroked-button
+        color="primary"
+        [routerLink]="['/edit', post._id]"
+      >
+        <mat-icon>edit</mat-icon>
+        My listing
+      </button>
 
+      <!-- Non-owner: either Make an inquiry or View messages -->
+      <ng-container *ngIf="userIsAuth && userId !== post.creator">
+        <!-- No conversation yet for this post -->
         <button
-          *ngIf="userIsAuth && userId !== post.creator"
+          *ngIf="!hasConversationForPost(post._id)"
           mat-raised-button
           color="primary"
           (click)="openInquiryDialog(post.creator, post._id, $event)"
@@ -279,17 +283,29 @@
           Make an inquiry
         </button>
 
-
+        <!-- Conversation exists for this post -->
         <button
-          *ngIf="!userIsAuth"
+          *ngIf="hasConversationForPost(post._id)"
           mat-stroked-button
           color="primary"
-          routerLink="/auth/login"
+          (click)="viewMessagesForPost(post._id)"
         >
-          <mat-icon>login</mat-icon>
-          Login to inquire
+          <mat-icon>chat</mat-icon>
+          View messages
         </button>
-      </mat-card-actions>
+      </ng-container>
+
+      <!-- Not logged in -->
+      <button
+        *ngIf="!userIsAuth"
+        mat-stroked-button
+        color="primary"
+        routerLink="/auth/login"
+      >
+        <mat-icon>login</mat-icon>
+        Login to inquire
+      </button>
+    </mat-card-actions>
     </mat-card>
   </div>
 

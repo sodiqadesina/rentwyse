@@ -47,14 +47,16 @@ const User = require("../models/user");
 exports.startOrGetConversation = async (req, res) => {
   try {
     const { userId } = req.userData; // Sender, authenticated user
-    const { recipientId } = req.body; // Receiver
-    const { postId } = req.body;
+    const { recipientId, postId } = req.body; // Receiver + Post
+
+    // Conversation is unique per (user A, user B, postId)
     let conversation = await Conversation.findOne({
       participants: { $all: [userId, recipientId] },
+      postId: postId,
     });
 
     if (!conversation) {
-      // Start a new conversation if it does not exist
+      // Start a new conversation if it does not exist for this post
       console.log("no convo");
       conversation = new Conversation({
         participants: [userId, recipientId],
@@ -72,6 +74,7 @@ exports.startOrGetConversation = async (req, res) => {
     res.status(500).json({ message: "Failed to get conversation" });
   }
 };
+
 
 //Read
 exports.getConversationMessages = async (req, res) => {

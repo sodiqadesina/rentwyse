@@ -9,30 +9,47 @@ import { MessageService } from '../messaging.service';
   styleUrls: ['inquiry-dialog.component.css']
 })
 export class InquiryDialogComponent {
-  messageContent!: string;
+  messageContent = '';
 
   constructor(
     public dialogRef: MatDialogRef<InquiryDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { partnerId: string, postId: string },
+    @Inject(MAT_DIALOG_DATA) public data: { partnerId: string; postId: string },
     private messageService: MessageService
   ) {}
 
-  onSend() {
-    if (!this.messageContent) return;
+  onSend(): void {
+    const trimmed = this.messageContent.trim();
+    if (!trimmed) return;
 
-    // Assuming that `startOrGetConversation` will handle the logic of creating a new
-    // conversation if it doesn't exist, and returning its ID.
-    this.messageService.startOrGetConversation(this.data.partnerId, this.data.postId).subscribe(conversation => {
-      // Now, `conversation` should have an `_id` field which is the conversation ID.
-      // The sendMessage method should require only the conversation ID and the message content.
-      this.messageService.sendMessage(this.data.partnerId, this.messageContent).subscribe(() => {
-        // Handle the successful sending of a message.
-        this.dialogRef.close();
-      }, error => {
-        // Handle errors here, such as displaying a notification to the user.
+    // 1) Get (or create) the conversation for THIS post
+    this.messageService
+      .startOrGetConversation(this.data.partnerId, this.data.postId)
+      .subscribe({
+        next: (res: any) => {
+          // Backend returns: { message, conversationId, postId }
+          const conversationId = res.conversationId || res._id;
+          if (!conversationId) {
+            console.error('No conversationId returned from startOrGetConversation', res);
+            return;
+          }
+
+          // 2) Send message IN that specific conversation
+          this.messageService
+            .replyMessage(conversationId, this.data.partnerId, trimmed)
+            .subscribe({
+              next: () => {
+                this.dialogRef.close(true); // optionally pass true so caller can refresh
+              },
+              error: (err) => {
+                console.error('Failed to send inquiry message', err);
+                // TODO: show snackbar / toast if you want
+              }
+            });
+        },
+        error: (err) => {
+          console.error('Failed to start or get conversation', err);
+          // TODO: show snackbar / toast if you want
+        }
       });
-    }, error => {
-      // Handle errors here, such as if the conversation couldn't be started or retrieved.
-    });
   }
 }

@@ -273,11 +273,12 @@
           *ngIf="userIsAuth && userId !== post.creator"
           mat-raised-button
           color="primary"
-          (click)="openInquiryDialog(post.creator, post._id)"
+          (click)="openInquiryDialog(post.creator, post._id, $event)"
         >
           <mat-icon>mail_outline</mat-icon>
           Make an inquiry
         </button>
+
 
         <button
           *ngIf="!userIsAuth"

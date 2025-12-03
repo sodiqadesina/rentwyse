@@ -55,6 +55,15 @@
   gap: 12px 16px;
 }
 
+.inquiry-inline-dialog .mat-dialog-container {
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16);
+  border: 1px solid #e5e7eb;
+  max-width: 320px;
+}
+
+
 @media (max-width: 900px) {
   .filter-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));

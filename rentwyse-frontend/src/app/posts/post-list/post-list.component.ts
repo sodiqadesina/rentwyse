@@ -7,6 +7,8 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { InquiryDialogComponent } from '../../messaging/Inquiry-dialog/inquiry-dialog.component';
 import { ActivatedRoute } from '@angular/router';
+import { Overlay } from '@angular/cdk/overlay';
+
 
 @Component({
   selector: 'app-post-list',
@@ -37,7 +39,7 @@ export class PostListComponent implements OnInit, OnDestroy {
   descriptionExpanded: { [postId: string]: boolean } = {};
 
 
-  constructor(public postsService: PostsService, private authService: AuthService, public dialog: MatDialog, private route: ActivatedRoute){}
+  constructor(public postsService: PostsService, private authService: AuthService, public dialog: MatDialog, private route: ActivatedRoute, private overlay: Overlay){}
 
 
 ngOnInit(){
@@ -129,14 +131,69 @@ isDescriptionLong(post: post): boolean {
 
 
 
-openInquiryDialog(partnerId: string, postId:string): void {
-  this.dialog.open(InquiryDialogComponent, {
+openInquiryDialog(partnerId: string, postId: string, event: MouseEvent): void {
+  const trigger = event.currentTarget as HTMLElement;
+
+  // Helper to compute the position just under the button
+  const computePosition = () => {
+    const rect = trigger.getBoundingClientRect();
+
+    const scrollTop =
+      window.pageYOffset || document.documentElement.scrollTop || 0;
+    const scrollLeft =
+      window.pageXOffset || document.documentElement.scrollLeft || 0;
+
+    return {
+      top: `${rect.bottom + scrollTop + 8}px`, // 8px gap under the button
+      left: `${rect.left + scrollLeft}px`,
+    };
+  };
+
+  const dialogRef = this.dialog.open(InquiryDialogComponent, {
     width: '300px',
-    // height: 'auto',
-    // panelClass: 'custom-dialog-container',
-    data: { partnerId, postId }
+    data: { partnerId, postId },
+    hasBackdrop: false,                   // no grey background
+    panelClass: 'inquiry-inline-dialog',  // for styling
+    position: computePosition(),
+    scrollStrategy: this.overlay.scrollStrategies.noop(),  
+  });
+
+
+  // Keep the dialog aligned with the button while scrolling
+  const scrollHandler = () => {
+    dialogRef.updatePosition(computePosition());
+  };
+  window.addEventListener('scroll', scrollHandler, true);
+
+  // Close when clicking outside dialog & button
+  const clickHandler = (evt: MouseEvent) => {
+    const dialogEl = document.querySelector(
+      '.inquiry-inline-dialog'
+    ) as HTMLElement | null;
+
+    const target = evt.target as Node;
+
+    const clickedInsideDialog = dialogEl && dialogEl.contains(target);
+    const clickedOnButton = trigger.contains(target);
+
+    if (!clickedInsideDialog && !clickedOnButton) {
+      dialogRef.close();
+    }
+  };
+
+  // Delay to avoid the opening click closing it immediately
+  setTimeout(() => {
+    document.addEventListener('click', clickHandler, true);
+  });
+
+  // Cleanup listeners when dialog closes
+  dialogRef.afterClosed().subscribe(() => {
+    document.removeEventListener('click', clickHandler, true);
+    window.removeEventListener('scroll', scrollHandler, true);
   });
 }
+
+
 
 previousImage(postId: string) {
     if (this.currentImageIndices[postId] > 0) {

@@ -213,9 +213,8 @@ openInquiryDialog(partnerId: string, postId: string, event: MouseEvent): void {
     hasBackdrop: false,                   // no grey background
     panelClass: 'inquiry-inline-dialog',  // for styling
     position: computePosition(),
-    scrollStrategy: this.overlay.scrollStrategies.noop(),  
+    scrollStrategy: this.overlay.scrollStrategies.noop(),
   });
-
 
   // Keep the dialog aligned with the button while scrolling
   const scrollHandler = () => {
@@ -244,12 +243,21 @@ openInquiryDialog(partnerId: string, postId: string, event: MouseEvent): void {
     document.addEventListener('click', clickHandler, true);
   });
 
-  // Cleanup listeners when dialog closes
-  dialogRef.afterClosed().subscribe(() => {
+  // Cleanup listeners when dialog closes + update button state
+  dialogRef.afterClosed().subscribe((result) => {
     document.removeEventListener('click', clickHandler, true);
     window.removeEventListener('scroll', scrollHandler, true);
+
+    // 🔥 result comes from dialogRef.close({ conversationId, postId })
+    if (result && result.conversationId && result.postId) {
+      this.conversationsByPostId[result.postId] = {
+        _id: result.conversationId,
+        postId: result.postId
+      };
+    }
   });
 }
+
 
 
 

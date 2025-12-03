@@ -38,7 +38,10 @@ export class InquiryDialogComponent {
             .replyMessage(conversationId, this.data.partnerId, trimmed)
             .subscribe({
               next: () => {
-                this.dialogRef.close(true); // optionally pass true so caller can refresh
+                  this.dialogRef.close({
+                  conversationId,
+                  postId: this.data.postId
+                });
               },
               error: (err) => {
                 console.error('Failed to send inquiry message', err);

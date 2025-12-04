@@ -1,46 +1,145 @@
-# RentWyse 🚧 👷 🔨🛠️ 🔧🚧 UNDER CONSTRUCTION 🚧🔧
+# Rent-Wyse Frontend (Angular 17)
+
+Modern Single-Page Application for a full-stack rental marketplace.
+
+## 📌 Overview
+Rent-Wyse Frontend is a feature-rich Angular SPA that powers the user interface of the Rent-Wyse rental marketplace.
+
+It provides:
+
+- Property browsing & filtering
+
+- Listing creation & management
+
+- Real-time messaging between tenants & landlords
+
+- JWT authentication system
+
+- WebSocket notifications
+
+- File uploads (images & documents)
+
+- Dialog-driven interactions (inquiries, confirmations, edits)
+
+This frontend communicates with:
+
+- Node.js/Express REST API (HTTP + JSON)
+
+- Socket.io server (WebSockets)
+
+- MongoDB (via backend)
 
 
-- Created auth, error, header, posts, asset, environments and footer folders.
+# 🛠️ Technology Stack
+| Layer        | Technology                                |
+| ------------ | ----------------------------------------- |
+| UI Framework | **Angular 17 (SPA)**                      |
+| Styling      | Angular Material, Flex Layout, Custom CSS |
+| State        | RxJS, Subjects/BehaviorSubjects           |
+| Messaging    | Socket.io-client                          |
+| HTTP         | Angular HttpClient + JWT AuthInterceptor  |
+| Dialogs      | Angular Material Dialog                   |
+| Forms        | Reactive Forms                            |
+| Routing      | Angular Router                            |
 
-- In the Auth we handle user login and sign up
+# Project Structure 
+```
+src/app/
+│
+├── auth/
+│   ├── login/
+│   ├── signup/
+│   ├── settings/
+│   ├── auth.service.ts
+│   ├── auth-interceptor.ts
+│   ├── auth-guard.ts
+│
+├── posts/
+│   ├── post-list/
+│   ├── post-create/
+│   ├── user-post-list/
+│   ├── posts.service.ts
+│
+├── messaging/
+│   ├── messages/
+│   ├── inquiry-dialog/
+│   ├── delete-confirmation/
+│   ├── messaging.service.ts
+│
+├── notification/
+│   ├── notification.component.ts
+│   ├── notification.service.ts
+│   ├── socket.service.ts
+│
+├── header/
+├── footer/
+├── home/
+├── error/
+├── loading/
+└── app.component.ts
+```
+# ⚙️ Frontend Architecture
 
-- In error we are handling error from the backend and displaying it on the screen
+The Angular application is structured using feature-based modules, core services, and cross-cutting infrastructure (interceptors, guards, sockets).
 
-- In Post we are handling posts from the backend
+ ![Architecture](images/componentarchitecture.png)
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/` and make sure the backend is running on http://localhost:5500 or change in the environment.ts file
+🧩 Frontend Component Rendering & Routing Flow 
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.0.
+This sequence diagram illustrates the initial application rendering flow and how routing determines which feature module is loaded in the Rent-Wyse Angular frontend.
 
-## Development server
+1. AppComponent bootstraps the entire application, acting as the root shell.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+2. It immediately triggers the rendering of shared layout components:
 
-## Code scaffolding
+  - HeaderComponent
+  
+  - FooterComponent
+  
+  - HomeComponent (default landing view)
+  
+  - NotificationComponent (for real-time socket alerts)
+  
+  - ErrorComponent (for global error handling)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+3. When a user interacts with the UI (for example clicking a button or selecting a menu item), the HomeComponent instructs the application to navigate using the Router.
 
-## Build
+4. The RouterOutlet receives the navigation request and determines which module to load:
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+  - Navigating to /auth/... loads the lazy-loaded AuthModule
+  
+  - Navigating to /list, /create, /edit/:id, /my-listing loads the PostsModule
+  
+  - Navigating to /message or /messages/:id loads the MessagingModule
 
-## Running unit tests
+5. Each route triggers the appropriate feature module and its components to render inside the RouterOutlet, while the AppComponent layout (header, footer, notification, etc.) remains persistent.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-## Running end-to-end tests
+# 🔐 Authentication Flow
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+  Components & services:
+  
+  - AuthService
+  
+  - AuthInterceptor
+  
+  - AuthGuard
+  
+  - LoginComponent, SignupComponent
+  
+  - ErrorInterceptor
+  
+  
+# 🏘️ Post / Listing Feature Architecture
 
-## Further help
+  Key files:
+  
+  - posts.service.ts
+  
+  - post-list.component.ts
+  
+  - post-create.component.ts
+  
+  - user-post-list.component.ts
+  
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
-
-  /!\ 
- /___\   UNDER CONSTRUCTION
-(_____)
-
-⚠️
-🚧
-🦺

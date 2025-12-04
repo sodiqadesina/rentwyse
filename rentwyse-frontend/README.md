@@ -82,7 +82,7 @@ src/app/
 
 The Angular application is structured using feature-based modules, core services, and cross-cutting infrastructure (interceptors, guards, sockets).
 
- ![Architecture](images/componentarchitecture.png)
+ ![Architecture](../images/componentarchitecture.png)
 
 🧩 Frontend Component Rendering & Routing Flow 
 
@@ -92,25 +92,25 @@ This sequence diagram illustrates the initial application rendering flow and how
 
 2. It immediately triggers the rendering of shared layout components:
 
-  - HeaderComponent
-  
-  - FooterComponent
-  
-  - HomeComponent (default landing view)
-  
-  - NotificationComponent (for real-time socket alerts)
-  
-  - ErrorComponent (for global error handling)
+    - HeaderComponent
+    
+    - FooterComponent
+    
+    - HomeComponent (default landing view)
+    
+    - NotificationComponent (for real-time socket alerts)
+    
+    - ErrorComponent (for global error handling)
 
 3. When a user interacts with the UI (for example clicking a button or selecting a menu item), the HomeComponent instructs the application to navigate using the Router.
 
 4. The RouterOutlet receives the navigation request and determines which module to load:
 
-  - Navigating to /auth/... loads the lazy-loaded AuthModule
-  
-  - Navigating to /list, /create, /edit/:id, /my-listing loads the PostsModule
-  
-  - Navigating to /message or /messages/:id loads the MessagingModule
+    - Navigating to /auth/... loads the lazy-loaded AuthModule
+    
+    - Navigating to /list, /create, /edit/:id, /my-listing loads the PostsModule
+    
+    - Navigating to /message or /messages/:id loads the MessagingModule
 
 5. Each route triggers the appropriate feature module and its components to render inside the RouterOutlet, while the AppComponent layout (header, footer, notification, etc.) remains persistent.
 
@@ -128,7 +128,48 @@ This sequence diagram illustrates the initial application rendering flow and how
   - LoginComponent, SignupComponent
   
   - ErrorInterceptor
-  
+
+
+  ![Architecture](../images/Login&Authentication-Sequence.png)
+
+This diagram illustrates the end-to-end user authentication flow in the Rent-Wyse frontend, showing how Angular components, services, the interceptor pipeline, and the backend coordinate to complete a secure login.
+
+1. User submits credentials in the login form displayed by the LoginComponent.
+
+2. The LoginComponent triggers the login process by calling AuthService.login().
+
+3. AuthService prepares the request and sends a POST /user/login call through Angular’s HttpClient.
+
+4. Before reaching the backend, the request passes through the AuthInterceptor, which:
+
+    - intercepts the request,
+    
+    - detects that no token should be applied (this is a login call),
+    
+    - forwards the request unchanged to the backend.
+
+5. The Backend validates the credentials.
+    If valid, it returns:
+
+    - a JWT authentication token,
+
+    - its expiration time,
+    
+    - the authenticated userId.
+
+6. The response flows back through the interceptor to HttpClient, and then back to AuthService.
+
+7. AuthService processes the successful login response:
+
+    - Stores the token, expiration timestamp, and userId in memory and localStorage.
+    
+    - Updates the internal authentication state.
+    
+    - Establishes a real-time connection by calling SocketService.connect(userId).
+
+8. AuthService notifies the LoginComponent that authentication succeeded.
+
+9. The LoginComponent performs a client-side redirect to load the main authenticated application interface.
   
 # 🏘️ Post / Listing Feature Architecture
 
@@ -141,5 +182,114 @@ This sequence diagram illustrates the initial application rendering flow and how
   - post-create.component.ts
   
   - user-post-list.component.ts
+
+  ![Architecture](../images/Post-Listing-Component.png)
+
+  This diagram illustrates how the Rent-Wyse frontend retrieves and displays property listings when the user opens the /list page or interacts with filters and pagination.
+
+  1. The User navigates to /list, changes search filters, or interacts with the paginator.
+  These actions cause the PostListComponent to refresh the listing data.
   
+  2. PostListComponent calls:
+    - PostsService.getPosts(page, pageSize, filters),
+    - requesting posts for the current view.
+  
+  3. PostsService sends an HTTP request using Angular’s HttpClient:
+  GET /posts?page=..&pagesize=..
+  
+  4. HttpClient forwards the request to the Posts API (Node/Express).
+  
+  5. The backend queries MongoDB for:
+    - the list of posts for the requested page
+    - the total result count for pagination
+  
+  6. MongoDB returns the records to the backend, which then responds with:
+  JSON { posts, count }
+  
+  7. HttpClient passes this response to PostsService.
+  
+ 8.  PostsService updates its postsUpdated$ observable, pushing:
+  
+     - the new list of posts
+      
+     - the updated total count
+    
+  9. PostListComponent subscribes to postsUpdated$, receives the updated data, and renders the listing cards and pagination controls for the user.
+
+# 💬 Messaging & Conversations
+
+  Full real-time chat with:
+  
+  Conversation threads
+  
+  - Message history
+  
+  - Typing & sending
+  
+   - Document sharing
+  
+  - Viewing date scheduling
+  
+  - Price renegotiation
+  
+  - Socket-based notifications
+
+  Key files:
+  
+  - messaging.service.ts
+  
+  - messages.component.ts
+  
+  - socket.service.ts
+  
+  - notification.service.ts
+
+
+# 📡 Real-Time Notification Flow
+
+  - Backend emits "newMessage"
+  
+  - SocketService receives it
+  
+  - NotificationService stores it
+  
+  - NotificationComponent displays MatSnackBar
+  
+  - Header badge updates unread count
+
+# 🧠 Component - Service Relationships
+| Component                | Depends On                                 | Purpose                                      |
+| ------------------------ | ------------------------------------------ | -------------------------------------------- |
+| `PostListComponent`      | PostsService, AuthService, MatDialog       | List properties, start conversations         |
+| `PostCreateComponent`    | PostsService, AuthService                  | Create / edit listings                       |
+| `UserPostListComponent`  | PostsService                               | Show user-owned posts                        |
+| `MessagesComponent`      | MessageService, SocketService, AuthService | All messaging functionality                  |
+| `InquiryDialogComponent` | MessageService, MatDialogRef               | Start/get conversation, send initial message |
+| `NotificationComponent`  | NotificationService, SocketService         | Real-time alerts                             |
+| `HeaderComponent`        | AuthService, MessageService                | Auth state + unread badge                    |
+| `Login/Signup`           | AuthService                                | Auth lifecycle                               |
+| `ErrorComponent`         | ErrorInterceptor                           | Global error UI                              |
+
+# API Integration
+  REST Endpoints Used:
+  
+    - /user/login
+    
+    - /user/signup
+    
+    - /posts/...
+    
+    - /user-post/...
+    
+    - /messages/...
+    
+    - /conversations/...
+  
+  WebSockets:
+  
+    connect(userId)
+    
+    disconnect()
+    
+    Listen for "newMessage"
 

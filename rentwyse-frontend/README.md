@@ -270,6 +270,122 @@ This diagram illustrates the end-to-end user authentication flow in the Rent-Wys
 | `Login/Signup`           | AuthService                                | Auth lifecycle                               |
 | `ErrorComponent`         | ErrorInterceptor                           | Global error UI                              |
 
+# topics & subscriptions
+
+🔐 AuthService – authStatusListener: Subject<boolean>
+  
+Topic: “Is the user authenticated?”
+
+Defined in: auth.service.ts
+  - Emits true on:
+  - successful login
+  - successful autoAuthUser() (when restoring from localStorage)
+  - Emits false on:
+  - login/signup error
+  - logout() 
+  
+Publishers:
+  - createUser(...) (on failure / after dialog)
+  - login(...) (on success or error)
+  - autoAuthUser()
+  - logout()
+
+Subscribers:
+  - HeaderComponent
+    - Subscribes via authService.getAuthStatusListener()
+    - Updates userIsAuth so the nav bar shows/hides links appropriately.
+  - PostListComponent
+  - PostCreateComponent
+  - UserPostListComponent
+    - All three subscribe to update:
+      - userIsAuth (to show/hide edit/delete)
+      - userId (to check if the current user is the creator of a post).
+  - NotificationComponent
+    - Subscribes so it can connect/disconnect the socket when login state changes.
+  - SignupComponent / LoginComponent
+    - Use it to drive their local isLoading flags and react to auth errors/success.
+   
+ 🏘 PostsService – postsUpdated: Subject<{ posts, postCount }>
+
+Topic: “Current listing results for the active query/page”
+
+Defined in: posts.service.ts
+
+Publishers:
+
+  - getPosts(postsPerPage, currentPage, filters...)
+  
+  - getPostsByUserId(postsPerPage, currentPage)
+
+Each method:
+
+  - Builds the query string (including filters).
+  
+  - Does HttpClient.get(...).
+  
+  - Maps raw JSON into your post model.
+  
+  - Calls:
+```
+this.posts = postData.posts;
+this.postsUpdated.next({
+  posts: [...this.posts],
+  postCount: postData.maxPost
+});
+```
+Subscribers:
+
+  - PostListComponent
+``` this.postsSub = this.postsService.getPostUpdateListener()
+  .subscribe((postData) => {
+    this.isLoading = false;
+    this.totalPosts = postData.postCount;
+    this.posts = postData.posts;
+  });
+```
+- UserPostListComponent
+   - Same pattern, but restricted to posts of the logged-in user.
+ 
+💬 MessageService – unreadMessageCount: BehaviorSubject<number>
+
+Topic: “Global unread messages badge count”
+
+Defined in: messaging.service.ts
+
+Publishers:
+
+  - fetchUnreadMessageCount()
+  
+    - Called after marking messages as read.
+    
+    - Called from Notification flow when new messages arrive.
+    
+  - Any place that calls updateUnreadMessageCount(...) directly.
+
+Subscribers:
+
+  - HeaderComponent
+  ```
+  this.messageService.getUnreadMessageCount()
+    .subscribe(count => this.unreadMessageCount = count);
+  ```
+  Displays the value as a badge in the header.
+  - MessagesComponent
+    After:
+    ```
+    this.messageService.markMessagesAsRead(conversationId).subscribe(() => {
+    this.messageService.fetchUnreadMessageCount();
+    });
+    ```
+    So the header badge stays in sync when a conversation is opened and messages are read.
+
+  - NotificationComponent
+  
+    - Calls fetchUnreadMessageCount() whenever real-time notifications arrive, so the badge updates when the user doesn’t have the Messages page open.
+   
+🚧 👷 🔨 🛠️ 🔧🚧 UNDER CONSTRUCTION 🚧🔧   
+=========================================================================================
+    
 # API Integration
   REST Endpoints Used:
   

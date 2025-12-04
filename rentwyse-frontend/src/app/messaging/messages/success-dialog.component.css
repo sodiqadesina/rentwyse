@@ -1,0 +1,24 @@
+.success-dialog {
+  padding: 16px 20px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.success-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.success-message {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.black-btn {
+  background: black;
+  color: white;
+}

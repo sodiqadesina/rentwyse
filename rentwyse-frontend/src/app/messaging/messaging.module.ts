@@ -11,12 +11,14 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import {ConfirmationDialogComponent} from "./messages/delete-confirmation.component"
 import { MatDialogModule } from '@angular/material/dialog';
+import { SuccessDialogComponent } from "./messages/success-dialog.component"; 
 
 @NgModule({
 declarations: [
     InquiryDialogComponent,
     MessagesComponent,
-    ConfirmationDialogComponent
+    ConfirmationDialogComponent,
+    SuccessDialogComponent  
 ],
 imports: [
 CommonModule,

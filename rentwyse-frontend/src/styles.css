@@ -33,6 +33,18 @@ app-home{
     height: 100%;
 }
 
+.blurred-backdrop {
+  background-color: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(3px);
+}
+
+/* Small floating panel */
+.success-dialog-panel {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  border-radius: 12px !important;
+}
+
+
 app-post-list{
     width: 80%;
     margin: auto;

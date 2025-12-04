@@ -8,9 +8,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SocketService } from 'src/app/notification/socket.service';
 import { docTypeValidator } from './doc-type.validator';
-import { ConfirmationDialogComponent1 } from 'src/app/auth/settings/confirmation-dialog.component';
+import { SuccessDialogComponent } from './success-dialog.component';
 import { MatDialog ,MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material/dialog';
 import {ConfirmationDialogComponent} from "./delete-confirmation.component"
+import { MatButton } from '@angular/material/button';
 
 declare global {
   interface Window {
@@ -171,7 +172,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
                 this.selectedConversation.signedAgreementDocuments = this.selectedConversation.signedAgreementDocuments.filter((doc: string) => doc !== filename);
               }
 
-              const dialogRef = this.dialog.open(ConfirmationDialogComponent1, {
+              const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
                 data: { title: 'Document Delete Update', message: 'Your Document was Deleted successfully!' }
               });
         
@@ -214,42 +215,49 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
       return this.selectedConversation?.postId?.creator === this.currentUserId;
   }
 
-    onSetViewingDate() {
-    if (this.viewingDateForm.valid) {
+    onSetViewingDate(button: HTMLElement | MatButton) {
+       const origin =
+        button instanceof HTMLElement
+          ? button
+          : (button as MatButton)._elementRef.nativeElement;
+
+      if (!this.viewingDateForm.valid || !this.selectedConversation?._id) {
+        this.viewingDateForm.markAllAsTouched();
+        return;
+      }
+
       const date = this.viewingDateForm.get('viewingDate')?.value;
       const time = this.viewingDateForm.get('viewingTime')?.value;
 
-      // Combine date and time
       const viewingDate = new Date(date);
-      const [hours, minutes] = time.split(':');
-      viewingDate.setHours(hours, minutes);
+      if (time) {
+        const [hours, minutes] = time.split(':');
+        viewingDate.setHours(Number(hours), Number(minutes));
+      }
 
-        if (viewingDate) {
-            this.messageService.setViewingDate(this.selectedConversation._id, viewingDate)
-                .subscribe(response => {
-                    // Handle success
-                    this.viewingDateSet = true;
+      this.messageService
+        .setViewingDate(this.selectedConversation._id, viewingDate)
+        .subscribe({
+          next: () => {
+            this.viewingDateSet = true;
 
-                    // Update the UI with the new viewing date
-                    this.updateViewingDate(this.selectedConversation._id, new Date(viewingDate));
+            // Update UI locally (no second API call)
+            this.updateViewingDate(this.selectedConversation._id, viewingDate);
 
-                    const dialogRef = this.dialog.open(ConfirmationDialogComponent1, {
-                      data: { title: 'User Profile Update', message: 'Your viewing date was set successfully!' }
-                    });
-              
-                    // Handle the dialog close event
-                    dialogRef.afterClosed().subscribe(() => {
-                      // Redirect or perform other actions
-                      // this.router.navigate(["/auth/settings"]);
-                    });
-
-                }, error => {
-                    // Handle error
-                    console.error('Error setting viewing date', error);
-                });
-        }
+            //  Show small dialog under button
+            this.openSuccessDialog(
+              origin,
+              'Viewing Date Updated',
+              'Your viewing date was set successfully.'
+            );
+          },
+          error: (err) => {
+            console.error('Error setting viewing date', err);
+            
+          },
+        });
     }
-  }
+
 
   onFilePicked(event: Event) {
     const files = (event.target as HTMLInputElement).files;
@@ -283,7 +291,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
         this.selectedConversation.signedAgreementDocuments.push(...response.documentPaths);
       }
 
-      const dialogRef = this.dialog.open(ConfirmationDialogComponent1, {
+      const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
         data: { title: 'Document Upload Update', message: 'Your Document was uploaded successfully!' }
       });
 
@@ -305,22 +313,74 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
       
     }
 
+    openSuccessDialog(origin: HTMLElement, title: string, message: string): void {
+      const viewportWidth = window.innerWidth;
 
-    updateViewingDate(conversationId: string, newDate: Date) {
-      this.messageService.setViewingDate(conversationId, newDate).subscribe(response => {
-        // Find and update the specific conversation with the new viewing date
-        const index = this.conversations.findIndex(c => c._id === conversationId);
-        if (index !== -1) {
-          this.conversations[index].viewingDate = newDate;
+      // 📱 MOBILE: simple centered dialog, takes ~90% width
+      if (viewportWidth <= 600) {
+        this.dialog.open(SuccessDialogComponent, {
+          data: { title, message },
+          hasBackdrop: true,
+          backdropClass: 'blurred-backdrop',
+          panelClass: 'success-dialog-panel',
+          maxWidth: '90vw',
+          width: '90vw'
+          // no position -> Material centers it nicely
+        });
+        return;
+      }
+
+      // 💻 DESKTOP / TABLET: anchored under the button
+      const rect = origin.getBoundingClientRect();
+
+      const dialogWidth = 320;
+      const dialogHeight = 160; // rough estimate
+      const margin = 16;
+
+      const viewportHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+
+      // Center under the button horizontally, but keep inside viewport
+      let left = rect.left + rect.width / 2 - dialogWidth / 2;
+      left = Math.max(margin, Math.min(left, viewportWidth - dialogWidth - margin));
+
+      // Show below the button by default
+      let top = rect.bottom + 8 + scrollY;
+
+      // If that would push it off screen, show above instead
+      const bottomLimit = scrollY + viewportHeight - margin;
+      if (top + dialogHeight > bottomLimit) {
+        top = rect.top + scrollY - dialogHeight - 8;
+      }
+
+      this.dialog.open(SuccessDialogComponent, {
+        data: { title, message },
+        hasBackdrop: true,
+        backdropClass: 'blurred-backdrop',
+        panelClass: 'success-dialog-panel',
+        width: dialogWidth + 'px',
+        position: {
+          top: top + 'px',
+          left: left + 'px'
         }
-        // Optionally, refresh the selected conversation display
-        if (this.selectedConversation && this.selectedConversation._id === conversationId) {
-          this.selectConversation(this.conversations[index]);
-        }
-      }, error => {
-        console.error('Error setting viewing date', error);
       });
     }
+
+
+
+
+
+    updateViewingDate(conversationId: string, newDate: Date) {
+      const index = this.conversations.findIndex(c => c._id === conversationId);
+      if (index !== -1) {
+        this.conversations[index].viewingDate = newDate;
+      }
+
+      if (this.selectedConversation && this.selectedConversation._id === conversationId) {
+        this.selectedConversation.viewingDate = newDate;
+      }
+    }
+
 
 
     previousImage() {

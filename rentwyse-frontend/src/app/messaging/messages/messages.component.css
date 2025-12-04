@@ -66,6 +66,8 @@
   margin-top: 0.5rem;
 }
 
+
+
 .inbox-item {
   width: 100%;
   border: none;
@@ -73,10 +75,11 @@
   padding: 0.45rem 0.4rem;
   border-radius: 10px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.65rem;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.1s ease;
+  text-align: left;
 }
 
 .inbox-item:hover {
@@ -405,6 +408,12 @@
   height: 100%;             
 }
 
+.chat-body-wrapper {
+  flex: 1 1 auto;        /* takes all available space above composer */
+  min-height: 0;         /* important so inner scroll can work */
+  display: flex;
+}
+
 .chat-header {
   display: flex;
   justify-content: space-between;
@@ -416,6 +425,8 @@
   font-size: 1rem;
   font-weight: 600;
 }
+
+
 
 .chat-body {
   flex: 1 1 auto;            
@@ -474,10 +485,13 @@
 }
 
 .chat-loading {
+  flex: 1 1 auto;
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 1rem 0;
 }
+
+
 
 /* Composer */
 
@@ -528,60 +542,80 @@ button[mat-raised-button] {
 /* Viewing card */
 
 .viewing-card {
-  padding: 0.8rem 1rem 1rem;
+  padding: 1.25rem 1.5rem;
   border-radius: 18px;
-  border: 1px solid #eee;
-  background: #ffffff;
+}
+
+/* Compact style for renters when a date exists */
+.viewing-card--compact {
+  padding-block: 1rem;
 }
 
 .viewing-header-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.4rem;
-}
-
-.section-subtitle {
-  margin: 0.15rem 0 0;
-  font-size: 0.85rem;
-  color: #777;
+  align-items: flex-start;
+  gap: 1rem;
 }
 
 .viewing-chip {
+  background-color: #000;
+  color: #ffd54f; /* or your existing yellow token */
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: #000000;
-  color: #f0bb00;
-  font-size: 0.78rem;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+  white-space: nowrap;
 }
 
 .viewing-chip mat-icon {
-  font-size: 16px;
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
 }
 
 .viewing-empty {
-  margin: 0.2rem 0 0.6rem;
-  font-size: 0.86rem;
-  color: #666;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0;
 }
 
 .viewing-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  align-items: flex-end;
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem 1rem;
 }
 
-.viewing-form mat-form-field {
-  min-width: 150px;
+.viewing-form .mat-form-field {
+  width: 100%;
 }
+
+.viewing-btn.mat-raised-button {
+  margin-top: 0.25rem;
+  align-self: flex-start;
+  background-color: #000;
+  color: #fff;
+  font-weight: 500;
+}
+
+.viewing-btn.mat-raised-button:hover {
+  background-color: #222;
+}
+
+.viewing-renter-note {
+  margin-top: 0.5rem;
+}
+
+.viewing-note {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
 
 /* Documents card */
 

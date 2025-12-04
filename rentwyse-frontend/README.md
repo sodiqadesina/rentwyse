@@ -272,6 +272,18 @@ This diagram illustrates the end-to-end user authentication flow in the Rent-Wys
 
 # topics & subscriptions
 
+![Architecture](../images/Domain-Event-Map.png)
+
+This domain event map shows how the main frontend contexts (Auth, Listings, Messaging, Notification/Shell) communicate using domain events instead of tight coupling.
+
+- When a user logs in, the AuthService raises UserLoggedIn, which triggers the header to update, the socket connection to be established, and listing components to unlock create/edit actions.
+
+- When the listing page loads or filters change, ListingsRequested and FiltersChanged flow into PostsService, which calls the backend and then emits ListingsLoaded, consumed by PostListComponent and UserPostListComponent.
+
+- The messaging flow uses events like ConversationStarted, MessageSent, MessageReceived, and MessagesRead to coordinate between MessagesComponent, MessageService, the REST API, and the Socket.io server.
+
+- Notifications and unread message badges are driven by MessageReceived, UnreadCountUpdated, and NewMessageNotificationRaised, which connect SocketService, NotificationService, NotificationComponent, and HeaderComponent.
+
 🔐 AuthService – authStatusListener: Subject<boolean>
   
 Topic: “Is the user authenticated?”
@@ -383,6 +395,106 @@ Subscribers:
   
     - Calls fetchUnreadMessageCount() whenever real-time notifications arrive, so the badge updates when the user doesn’t have the Messages page open.
    
+ 🔔 NotificationService – newMessages$: BehaviorSubject<any[]>
+
+  Topic: “Queue of new real-time messages from WebSocket”
+  
+  Defined in: notification.service.ts
+  ```
+  private newMessagesSource = new BehaviorSubject<any[]>([]);
+newMessages$ = this.newMessagesSource.asObservable();
+
+pushNewMessage(message: any) {
+  const current = this.newMessagesSource.getValue() || [];
+  this.newMessagesSource.next([...current, message]);
+}
+
+clearMessages() {
+  this.newMessagesSource.next([]);
+}
+```
+Publishers:
+
+- SocketService.connect(userId)
+```
+this.socket.on('connect', () => {
+  this.socket.emit('registerUser', userId);
+  this.onNewMessage((data) => {
+    console.log(data);
+    this.notificationService.pushNewMessage(data);
+  });
+});
+
+```
+Every newMessage event from the server gets pushed into the queue.
+
+Subscribers:
+- NotificationComponent
+```
+this.messageSubscription = this.notificationService.newMessages$
+  .subscribe(messages => {
+    if (messages.length > 0) {
+      this.showNotifications(messages);
+      this.notificationService.clearMessages();
+    }
+  });
+
+```
+- Shows snackbars for each new message.
+
+- Clears the queue after display.
+
+- Inside showNotifications, it also calls messageService.fetchUnreadMessageCount() to refresh the unread badge.
+
+🌐 SocketService – “newMessage” event stream
+
+This isn’t an RxJS Subject, but effectively a topic from the server:
+
+- socket.on('newMessage', ...) inside SocketService.
+
+- Two key consumers:
+
+  - NotificationService (via pushNewMessage) for global notifications.
+  
+  - MessagesComponent via socketService.onNewMessage(...) for live updates in the open conversation:
+
+    - It increments conversation.unreadCount for other threads.
+    
+    - Refreshes the currently open conversation if the message belongs there.
+   
+⏳ LoadingService – isLoading: BehaviorSubject<boolean>
+
+Topic: “Global loading state”
+
+Defined in: loading.service.ts
+```
+isLoading = new BehaviorSubject<boolean>(false);
+
+startLoading()  { this.isLoading.next(true);  }
+stopLoading()   { this.isLoading.next(false); }
+```
+- Designed to support a global spinner.
+
+- Right now, most components use their own isLoading boolean locally (Login, Signup, Settings, PostList, UserPostList), but the service is there we will centralize that later.
+
+🧭 Router-based topics (non-Subject, but still subscriptions)
+
+There are also a few important Angular Router observables that play like topics:
+
+- PostListComponent
+
+  - route.queryParams.subscribe(...)
+
+    - Drives the city filter when navigating from Home.
+
+- MessagesComponent
+
+  - route.params.subscribe(params => { conversationId })
+
+    - Opens a specific conversation when you go to /messages/:conversationId.
+
+These are not Subjects, but they’re still subscription-based flows that connect modules.
+
 🚧 👷 🔨 🛠️ 🔧🚧 UNDER CONSTRUCTION 🚧🔧   
 =========================================================================================
     

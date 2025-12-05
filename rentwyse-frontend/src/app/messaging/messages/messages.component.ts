@@ -315,8 +315,14 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
 
     openSuccessDialog(origin: HTMLElement, title: string, message: string): void {
       const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const scrollY = window.scrollY;
 
-      // 📱 MOBILE: simple centered dialog, takes ~90% width
+      const dialogWidth = 320;
+      const dialogHeight = 180; // approximate height of the success dialog
+      const margin = 16;
+
+      // 📱 Mobile: just center it, full-ish width
       if (viewportWidth <= 600) {
         this.dialog.open(SuccessDialogComponent, {
           data: { title, message },
@@ -325,33 +331,25 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
           panelClass: 'success-dialog-panel',
           maxWidth: '90vw',
           width: '90vw'
-          // no position -> Material centers it nicely
+          // no position => centered
         });
         return;
       }
 
-      // 💻 DESKTOP / TABLET: anchored under the button
+      // 💻 Desktop: anchor under the button, but keep within viewport
       const rect = origin.getBoundingClientRect();
 
-      const dialogWidth = 320;
-      const dialogHeight = 160; // rough estimate
-      const margin = 16;
-
-      const viewportHeight = window.innerHeight;
-      const scrollY = window.scrollY;
-
-      // Center under the button horizontally, but keep inside viewport
+      // Horizontal: center under the button, clamped to viewport
       let left = rect.left + rect.width / 2 - dialogWidth / 2;
       left = Math.max(margin, Math.min(left, viewportWidth - dialogWidth - margin));
 
-      // Show below the button by default
+      // Vertical: desired position just under the button (page coords)
       let top = rect.bottom + 8 + scrollY;
 
-      // If that would push it off screen, show above instead
-      const bottomLimit = scrollY + viewportHeight - margin;
-      if (top + dialogHeight > bottomLimit) {
-        top = rect.top + scrollY - dialogHeight - 8;
-      }
+      // Clamp so the dialog is fully visible within viewport
+      const minTop = scrollY + margin;
+      const maxTop = scrollY + viewportHeight - dialogHeight - margin;
+      top = Math.max(minTop, Math.min(top, maxTop));
 
       this.dialog.open(SuccessDialogComponent, {
         data: { title, message },
@@ -359,12 +357,14 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
         backdropClass: 'blurred-backdrop',
         panelClass: 'success-dialog-panel',
         width: dialogWidth + 'px',
+        maxWidth: '90vw',
         position: {
           top: top + 'px',
           left: left + 'px'
         }
       });
     }
+
 
 
 

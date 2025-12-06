@@ -1,189 +1,253 @@
+/**
+ * Posts Controller Tests
+ *
+ * Covers:
+ *  - deletePost (soft delete via updateOne)
+ *  - newPost (create listing)
+ *  - listPostById (respect soft delete)
+ *
+ * Post model is mocked as:
+ *  - a constructor for newPost (new Post(...))
+ *  - plus static methods: updateOne, findOne
+ */
+
 const Post = require("../models/post");
 const postsController = require("./PostsController");
 
-// Mock the Post model
+// --- Mock the Post model (constructor + static methods) --------------------
+
+// IMPORTANT: jest.mock must be above the require in real file order.
+// In your actual file, move this `jest.mock` to the top of the file if needed.
 jest.mock("../models/post", () => {
-  return jest.fn().mockImplementation(() => {
+  // Mock constructor: new Post(doc)
+  const MockPostConstructor = jest.fn().mockImplementation((doc) => {
     return {
+      ...doc,
+      // save() simulates Mongoose .save(), returning a persisted post
       save: jest.fn().mockResolvedValue({
         _id: "123",
-        title: "Test Post",
-        description: "Test Description",
-        imagePath: ["test.jpg"],
-        creator: "user123",
-        // Add other fields here as per your schema
+        title: doc.title,
+        description: doc.description,
+        imagePath: doc.imagePath || [],
+        creator: doc.creator,
+        // Add other fields as needed
       }),
     };
   });
+
+  // Attach static methods that controller uses:
+  MockPostConstructor.updateOne = jest.fn();
+  MockPostConstructor.findOne = jest.fn();
+
+  return MockPostConstructor;
 });
 
-// test for delete post fuc in the Post Controller
-describe("deletePost", () => {
-  //Happy test case
-  it("should delete a post and return success message", async () => {
-    const mockDeleteOne = jest.fn().mockResolvedValue({ deletedCount: 1 });
-    Post.deleteOne = mockDeleteOne;
+// --- Common res mock -------------------------------------------------------
+
+const createMockRes = () => ({
+  status: jest.fn().mockReturnThis(),
+  json: jest.fn(),
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+//
+// DELETE POST (SOFT DELETE)
+//
+
+describe("PostController - deletePost", () => {
+  it("should soft delete a post and return success message", async () => {
+    // Simulate successful soft delete (1 document updated)
+    Post.updateOne.mockResolvedValue({
+      acknowledged: true,
+      matchedCount: 1,
+      modifiedCount: 1,
+    });
 
     const req = {
       params: { _id: "123" },
       userData: { userId: "user123" },
     };
-
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+    const res = createMockRes();
 
     await postsController.deletePost(req, res);
 
-    expect(mockDeleteOne).toHaveBeenCalledWith({
-      _id: "123",
-      creator: "user123",
-    });
+    // Ensure we hit correct query & update
+    expect(Post.updateOne).toHaveBeenCalledWith(
+      {
+        _id: "123",
+        creator: "user123",
+        isDeleted: { $ne: true },
+      },
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: expect.any(Date),
+        },
+      }
+    );
+
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ message: "Delete Successful!" });
   });
 
-  //Failure test case
-  it("should return an error message if the post does not exist or cannot be deleted", async () => {
-    // Mocking Post.deleteOne to simulate no post being deleted (e.g., post doesn't exist)
-    const mockDeleteOne = jest.fn().mockResolvedValue({ deletedCount: 0 });
-    Post.deleteOne = mockDeleteOne;
+  it("should return 404 if the post does not exist or user is not authorized", async () => {
+    // Simulate no document updated (e.g. not found or already deleted)
+    Post.updateOne.mockResolvedValue({
+      acknowledged: true,
+      matchedCount: 0,
+      modifiedCount: 0,
+    });
 
     const req = {
       params: { _id: "non-existent-id" },
       userData: { userId: "user123" },
     };
-
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+    const res = createMockRes();
 
     await postsController.deletePost(req, res);
 
-    // Assert that the function is called with the expected parameters
-    expect(mockDeleteOne).toHaveBeenCalledWith({
-      _id: "non-existent-id",
-      creator: "user123",
-    });
+    expect(Post.updateOne).toHaveBeenCalledWith(
+      {
+        _id: "non-existent-id",
+        creator: "user123",
+        isDeleted: { $ne: true },
+      },
+      expect.any(Object) // we don't care about the exact $set object here
+    );
 
-    // Assert that the appropriate response is sent back
-    expect(res.status).toHaveBeenCalledWith(404); // or 401 if not authorized
+    expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({
       message: "Post not found or user not authorized to delete",
     });
   });
 });
 
-//test for creating a post fuc in the Post Controller
-describe("newPost", () => {
+//
+// NEW POST
+//
+
+describe("PostController - newPost", () => {
   it("should create a new post and return success message", async () => {
     const req = {
       body: {
         title: "Test Post",
         description: "Test Description",
+        city: "Waterloo",
       },
       userData: { userId: "user123" },
       files: [{ filename: "test.jpg" }],
       protocol: "http",
-      get: jest.fn().mockReturnValue("localhost:3000"),
+      get: jest.fn().mockReturnValue("localhost:3000"), // req.get("host")
     };
 
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+    const res = createMockRes();
 
     await postsController.newPost(req, res);
 
-    expect(Post).toHaveBeenCalled();
+    // Ensure constructor was called to create the Post document
+    expect(Post).toHaveBeenCalledTimes(1);
+    const postArgs = Post.mock.calls[0][0];
+
+    expect(postArgs).toEqual(
+      expect.objectContaining({
+        title: "Test Post",
+        description: "Test Description",
+        creator: "user123",
+        // imagePath & other fields are derived in controller
+      })
+    );
+
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Post added successfully",
         post: expect.objectContaining({
-          _id: expect.any(String),
+          _id: "123",
           title: "Test Post",
           description: "Test Description",
-          // Validate other fields as necessary
         }),
       })
     );
   });
 
-  // Test case for error when userId is not present
-  it("should throw an error if userId is not present", async () => {
+  it("should not proceed if userId is missing (throws or handles error)", async () => {
     const req = {
       body: {
         title: "Test Post Without UserId",
         description: "Test Description",
       },
-      // userData is missing or does not have userId
-      userData: {},
+      userData: {}, // missing userId
       files: [{ filename: "test.jpg" }],
       protocol: "http",
       get: jest.fn().mockReturnValue("localhost:3000"),
     };
 
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+    const res = createMockRes();
 
-    // Assert that the status and json methods are not called since an exception is expected
-    expect(res.status).not.toHaveBeenCalled();
-    expect(res.json).not.toHaveBeenCalled();
+    // Depending on your implementation, newPost might throw or send 401/400.
+    // We'll just assert that it doesn't send a successful response.
+    try {
+      await postsController.newPost(req, res);
+    } catch (e) {
+      // ignore – the test focuses on not returning success
+    }
+
+    expect(res.status).not.toHaveBeenCalledWith(201);
+    // Optionally you could assert a 400/401 here if that's in your controller.
   });
 });
 
-// Mock data for a single post
-const mockPost = {
-  _id: "123",
-  title: "Test Post",
-  description: "Test Description",
-  creator: "user123",
-  // Add other fields from your schema as necessary
-};
+//
+// LIST POST BY ID (RESPECTS SOFT DELETE)
+//
 
-// Mocking  Post.findById
-Post.findById = jest.fn().mockResolvedValue(mockPost);
+describe("PostController - listPostById", () => {
+  const mockPost = {
+    _id: "123",
+    title: "Test Post",
+    description: "Test Description",
+    creator: "user123",
+  };
 
-//test to list a Post by id fuc in the Post Controller
-describe("listPostById", () => {
-  it("should fetch a post by ID and return it", async () => {
+  it("should fetch a non-deleted post by ID and return it", async () => {
+    // Controller uses Post.findOne({ _id: postId, isDeleted: { $ne: true } })
+    Post.findOne.mockResolvedValue(mockPost);
+
     const req = {
       params: { id: "123" },
     };
-
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+    const res = createMockRes();
 
     await postsController.listPostById(req, res);
 
-    expect(Post.findById).toHaveBeenCalledWith("123");
+    expect(Post.findOne).toHaveBeenCalledWith({
+      _id: "123",
+      isDeleted: { $ne: true },
+    });
+
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(mockPost);
   });
 
-  it("should return a 404 if the post is not found", async () => {
-    // Setup Post.findById to return null for this test
-    Post.findById.mockResolvedValue(null);
+  it("should return 404 if the post is not found or is soft deleted", async () => {
+    // findOne returns null → not found
+    Post.findOne.mockResolvedValue(null);
 
     const req = {
       params: { id: "not-found-id" },
     };
-
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+    const res = createMockRes();
 
     await postsController.listPostById(req, res);
 
-    expect(Post.findById).toHaveBeenCalledWith("not-found-id");
+    expect(Post.findOne).toHaveBeenCalledWith({
+      _id: "not-found-id",
+      isDeleted: { $ne: true },
+    });
+
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({ message: "Post not Found" });
   });

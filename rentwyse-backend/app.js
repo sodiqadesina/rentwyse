@@ -16,6 +16,7 @@ const kycRoutes = require("./routes/kyc");
 const messageRoutes = require("./routes/messages");
 const conversationRoutes = require("./routes/conversations");
 const cors = require("cors");
+const adminRoutes = require("./routes/admin");
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -93,7 +94,7 @@ app.use("/api/posts", postsRoutes);
 app.use("/api/kyc", kycRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/conversations", conversationRoutes);
-
+app.use("/api/admin", adminRoutes);
 app.get("/", (req, res) => {
   res.send("welcome to rent-wyse");
 });

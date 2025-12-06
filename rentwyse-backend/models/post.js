@@ -25,6 +25,17 @@ const postSchema = mongoose.Schema({
     // Soft delete fields
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
+
+
+  status: {
+    type: String,
+    enum: ["draft", "active", "flagged", "deleted"],
+    default: "active",
+  },
+  featured: { type: Boolean, default: false },
+  views: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model("Post", postSchema);

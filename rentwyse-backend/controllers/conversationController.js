@@ -9,8 +9,16 @@ const User = require("../models/user");
 //importing paypal client
 
 // const { paypalClient } = require("../config/papalConfig");
-
 // const checkoutNodeJssdk = require("@paypal/checkout-server-sdk");
+
+/**
+ * Lightweight logger for this controller.
+ * If you introduce a central logger (Winston/pino), you can wire it in here.
+ */
+const logger = {
+  info: (...args) => console.log("[INFO] [ConversationController]", ...args),
+  error: (...args) => console.error("[ERROR] [ConversationController]", ...args),
+};
 
 // async function createPayPalTransaction(conversationId) {
 //   const client = paypalClient();
@@ -43,11 +51,26 @@ const User = require("../models/user");
 //   }
 // }
 
-//create
+/**
+ * Start a new conversation or fetch an existing one between
+ * the authenticated user and a recipient for a specific post.
+ *
+ * POST /api/conversations
+ *
+ * Body:
+ *  - recipientId: string (ObjectId of the other user)
+ *  - postId     : string (ObjectId of the related post)
+ */
 exports.startOrGetConversation = async (req, res) => {
   try {
     const { userId } = req.userData; // Sender, authenticated user
     const { recipientId, postId } = req.body; // Receiver + Post
+
+    logger.info("startOrGetConversation called", {
+      userId,
+      recipientId,
+      postId,
+    });
 
     // Conversation is unique per (user A, user B, postId)
     let conversation = await Conversation.findOne({
@@ -57,7 +80,12 @@ exports.startOrGetConversation = async (req, res) => {
 
     if (!conversation) {
       // Start a new conversation if it does not exist for this post
-      console.log("no convo");
+      logger.info("No existing conversation found, creating new one", {
+        userId,
+        recipientId,
+        postId,
+      });
+
       conversation = new Conversation({
         participants: [userId, recipientId],
         postId: postId,
@@ -71,16 +99,24 @@ exports.startOrGetConversation = async (req, res) => {
       postId: postId,
     });
   } catch (error) {
+    logger.error("startOrGetConversation error", error);
     res.status(500).json({ message: "Failed to get conversation" });
   }
 };
 
-
-//Read
+/**
+ * Get all messages for a specific conversation.
+ *
+ * GET /api/conversations/:conversationId/messages
+ */
 exports.getConversationMessages = async (req, res) => {
-  console.log("getConversationMessages hit");
+  logger.info("getConversationMessages called", {
+    conversationId: req.params.conversationId,
+  });
+
   try {
     const { conversationId } = req.params;
+
     const messages = await Message.find({ conversationId: conversationId })
       .populate("sender", "username")
       .populate("receiver", "username")
@@ -88,18 +124,29 @@ exports.getConversationMessages = async (req, res) => {
 
     res.status(200).json({ messages });
   } catch (error) {
+    logger.error("getConversationMessages error", error);
     res
       .status(500)
       .json({ message: "Failed to get messages", error: error.message });
   }
 };
 
-//Read
+/**
+ * Get all conversations for a specific user, including:
+ *  - Participant info
+ *  - Linked post
+ *  - Last message in each conversation
+ *  - Unread message count
+ *  - Viewing date (if set)
+ *
+ * GET /api/conversations/user/:userId
+ */
 exports.getAllConversationsForUser = async (req, res) => {
   try {
     const userId = req.params.userId;
-    console.log("conversation hit");
-    // Assuming that a 'Conversation' includes an array of participant IDs
+    logger.info("getAllConversationsForUser called", { userId });
+
+    // Conversations that include the given user
     const conversations = await Conversation.find({ participants: userId })
       .populate("participants", "username") // Adjust the fields you want to include from the 'User' model
       .populate("postId")
@@ -134,27 +181,60 @@ exports.getAllConversationsForUser = async (req, res) => {
       });
     }
 
+    logger.info("getAllConversationsForUser success", {
+      userId,
+      count: conversationsWithUnread.length,
+    });
+
     res.status(200).json(conversationsWithUnread); // Send this modified array back
   } catch (error) {
+    logger.error("getAllConversationsForUser error", error);
     res.status(500).json({ message: "Fetching conversations failed." });
   }
 };
 
-//Update
+/**
+ * Set a viewing date on a conversation (e.g., agreed date to view the car),
+ * only allowed by the post creator.
+ *
+ * PATCH /api/conversations/:conversationId/viewing-date
+ *
+ * Body:
+ *  - viewingDate: ISO date string
+ */
 exports.setViewingDate = async (req, res) => {
   const { viewingDate } = req.body;
   const conversationId = req.params.conversationId;
-  console.log("setting a viewing date !!!");
+
+  logger.info("setViewingDate called", {
+    conversationId,
+    viewingDate,
+    userId: req.userData && req.userData.userId,
+  });
+
   try {
     const conversation = await Conversation.findById(conversationId);
 
     if (!conversation) {
+      logger.info("setViewingDate - conversation not found", { conversationId });
       return res.status(404).json({ message: "Conversation not found" });
     }
 
     // Check if the user is the creator of the post linked to the conversation
     const post = await Post.findById(conversation.postId);
+    if (!post) {
+      logger.info("setViewingDate - post not found", {
+        postId: conversation.postId,
+      });
+      return res.status(404).json({ message: "Post not found" });
+    }
+
     if (req.userData.userId !== post.creator.toString()) {
+      logger.info("setViewingDate - unauthorized user", {
+        conversationId,
+        postCreator: post.creator,
+        requester: req.userData.userId,
+      });
       return res
         .status(403)
         .json({ message: "Not authorized to set the viewing date" });
@@ -172,12 +252,15 @@ exports.setViewingDate = async (req, res) => {
     const otherParticipantId = conversation.participants.find(
       (p) => p.toString() !== req.userData.userId
     );
-    emitNotificationToUser(
+
+    await emitNotificationToUser(
       req.userData.userId,
       otherParticipantId,
       conversation._id,
       `Viewing date set for ${viewingDate}`
     );
+
+    logger.info("setViewingDate success", { conversationId, viewingDate });
 
     res.status(200).json({
       message: "Viewing date set successfully",
@@ -185,13 +268,19 @@ exports.setViewingDate = async (req, res) => {
       conversation: conversation,
     });
   } catch (error) {
-    console.error("Error in setViewingDate:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to set viewing date", error: error.toString() });
+    logger.error("Error in setViewingDate:", error);
+    res.status(500).json({
+      message: "Failed to set viewing date",
+      error: error.toString(),
+    });
   }
 };
 
+/**
+ * Helper: emit a Socket.IO notification to a specific user for a given conversation.
+ *
+ * This is used for system-level notifications (viewing date set, document uploaded, etc).
+ */
 async function emitNotificationToUser(
   senderId,
   receiverId,
@@ -199,9 +288,16 @@ async function emitNotificationToUser(
   message
 ) {
   try {
+    logger.info("emitNotificationToUser called", {
+      senderId,
+      receiverId,
+      conversationId,
+      message,
+    });
+
     const sender = await User.findById(senderId);
     const senderUsername = sender ? sender.username : "Unknown";
-    console.log(senderId, receiverId, conversationId, message, senderUsername);
+
     const userSocketId = socket.getUserSockets()[receiverId];
     if (userSocketId) {
       socket.getIO().to(userSocketId).emit("newMessage", {
@@ -211,23 +307,49 @@ async function emitNotificationToUser(
         receiver: receiverId,
         senderUsername: senderUsername,
       });
+      logger.info("Notification emitted via socket", {
+        receiverId,
+        socketId: userSocketId,
+      });
+    } else {
+      logger.info("No active socket for receiver, skipping emit", {
+        receiverId,
+      });
     }
   } catch (err) {
-    console.error("Error in emitNotificationToUser:", err);
+    logger.error("Error in emitNotificationToUser:", err);
   }
 }
 
-//Document Upload
+/**
+ * Upload agreement/signed-agreement documents for a conversation.
+ * Behavior:
+ *  - If uploader is post creator → push to `agreementDocuments`.
+ *  - Otherwise → push to `signedAgreementDocuments` and mark `agreementSigned = true`.
+ *
+ * POST /api/conversations/:conversationId/documents
+ *
+ * This expects `multer` to have attached `req.files` (array of files).
+ */
 exports.uploadAgreementDocument = async (req, res) => {
   const conversationId = req.params.conversationId;
   const documents = req.files; // This will be an array of files
   let document;
+
+  logger.info("uploadAgreementDocument called", {
+    conversationId,
+    userId: req.userData && req.userData.userId,
+    fileCount: documents ? documents.length : 0,
+  });
 
   try {
     const conversation = await Conversation.findById(conversationId).populate(
       "postId"
     );
     if (!conversation) {
+      logger.info("uploadAgreementDocument - conversation not found", {
+        conversationId,
+      });
       return res.status(404).json({ message: "Conversation not found" });
     }
 
@@ -262,35 +384,65 @@ exports.uploadAgreementDocument = async (req, res) => {
       `${document} uploaded`
     );
 
+    logger.info("uploadAgreementDocument success", {
+      conversationId,
+      documentType: document,
+    });
+
     res.status(200).json({
       message: "Document uploaded successfully",
       documentPaths: documents.map((doc) => doc.filename), // Send back only filenames
       agreementSigned: conversation.agreementSigned,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to upload document", error: error.message });
+    logger.error("uploadAgreementDocument error", error);
+    res.status(500).json({
+      message: "Failed to upload document",
+      error: error.message,
+    });
   }
 };
 
+/**
+ * Serve a document file by filename from the `documents/` folder.
+ *
+ * GET /api/conversations/documents/:filename
+ */
 exports.viewDocument = (req, res) => {
   const filename = req.params.filename;
   const filepath = path.join(__dirname, "..", "documents", filename);
 
+  logger.info("viewDocument called", { filename, filepath });
+
   if (fs.existsSync(filepath)) {
     res.sendFile(filepath);
   } else {
+    logger.info("viewDocument - file not found", { filename });
     res.status(404).send("File not found");
   }
 };
 
-//Delete
+/**
+ * Delete a document associated with a conversation from:
+ *  - `agreementDocuments`
+ *  - `signedAgreementDocuments`
+ * and from disk as well.
+ *
+ * DELETE /api/conversations/:conversationId/documents/:filename
+ */
 exports.deleteDocument = async (req, res) => {
   const { conversationId, filename } = req.params;
+
+  logger.info("deleteDocument called", {
+    conversationId,
+    filename,
+    userId: req.userData && req.userData.userId,
+  });
+
   try {
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {
+      logger.info("deleteDocument - conversation not found", { conversationId });
       return res.status(404).json({ message: "Conversation not found" });
     }
 
@@ -313,10 +465,14 @@ exports.deleteDocument = async (req, res) => {
     const filepath = path.join(__dirname, "..", "documents", filename);
     if (fs.existsSync(filepath)) {
       fs.unlinkSync(filepath);
+      logger.info("deleteDocument - file removed from disk", { filepath });
+    } else {
+      logger.info("deleteDocument - file not found on disk", { filepath });
     }
 
     res.status(200).json({ message: "Document deleted successfully" });
   } catch (error) {
+    logger.error("deleteDocument error", error);
     res.status(500).json({ message: "Failed to delete document", error });
   }
 };
@@ -333,89 +489,4 @@ exports.deleteDocument = async (req, res) => {
 //       return res.status(404).json({ message: "Conversation not found" });
 //     }
 
-//     const salesTaxRate = getSalesTaxRate(province);
-//     const serviceCharge = renegotiatedPrice * 0.1; // 10% service charge
-//     const salesTax = renegotiatedPrice * salesTaxRate;
-//     const totalAmount = renegotiatedPrice + serviceCharge + salesTax;
-
-//     conversation.renegotiatedPrice = renegotiatedPrice;
-//     conversation.salesTax = salesTax;
-//     conversation.serviceCharge = serviceCharge;
-//     conversation.totalAmount = totalAmount;
-//     await conversation.save();
-
-//     res.status(200).json({
-//       message: "Invoice updated successfully",
-//       invoiceDetails: {
-//         renegotiatedPrice,
-//         salesTax,
-//         serviceCharge,
-//         totalAmount,
-//       },
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: "Failed to calculate invoice", error });
-//   }
-// };
-
-// // Function to return sales tax rate based on Canadian province
-// function getSalesTaxRate(province) {
-//   // Defining sales tax rates for each province
-//   const taxRates = {
-//     Alberta: 0.05, // GST
-//     "British Columbia": 0.12, // GST + PST
-//     Manitoba: 0.12, // GST + PST
-//     "New Brunswick": 0.15, // HST
-//     "Newfoundland and Labrador": 0.15, // HST
-//     "Northwest Territories": 0.05, // GST
-//     "Nova Scotia": 0.15, // HST
-//     Nunavut: 0.05, // GST
-//     Ontario: 0.13, // HST
-//     "Prince Edward Island": 0.15, // HST
-//     Quebec: 0.14975, // GST + QST
-//     Saskatchewan: 0.11, // GST + PST
-//     Yukon: 0.05, // GST
-//   };
-
-//   return taxRates[province] || 0; // Default to 0 if province not found
-// }
-
-// // endpoint in your controller to initiate a PayPal transaction
-
-// exports.createPayPalTransaction = async (req, res) => {
-//   const { conversationId } = req.body;
-//   console.log("we in create paypal payment");
-//   try {
-//     const transaction = await createPayPalTransaction(conversationId);
-//     res.status(200).json({
-//       message: "PayPal transaction created successfully",
-//       approvalUrl: transaction.links.find((link) => link.rel === "approve")
-//         .href,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({
-//       message: "Failed to create PayPal transaction",
-//       error: error.toString(),
-//     });
-//   }
-// };
-
-// exports.updatePaymentStatus = async (req, res) => {
-//   const { conversationId } = req.body;
-
-//   try {
-//     const conversation = await Conversation.findById(conversationId);
-//     if (!conversation) {
-//       return res.status(404).json({ message: "Conversation not found" });
-//     }
-
-//     // Update payment status to true
-//     conversation.paymentStatus = true;
-//     await conversation.save();
-
-//     res.status(200).json({ message: "Payment status updated successfully" });
-//   } catch (error) {
-//     res.status(500).json({ message: "Failed to update payment status", error });
-//   }
-// };
+//     const salesTaxRate = getSal

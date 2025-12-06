@@ -52,6 +52,25 @@ const userSchema = new mongoose.Schema({
   },
   emailToken: { type: String },
   isEmailVerified: { type: Boolean, default: false },
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
+  status: {
+    type: String,
+    enum: ["active", "banned"],
+    default: "active",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  kycStatus: {
+    type: String,
+    enum: ["not_submitted", "pending", "approved", "rejected"],
+    default: "not_submitted",
+  },
 });
 
 userSchema.plugin(uniqueValidator); // so this is how we run the check on the username and email to make sure its unique

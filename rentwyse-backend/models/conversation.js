@@ -43,7 +43,15 @@ const conversationSchema = mongoose.Schema({
       serviceCharge: Number,
       salesTax: Number,
       totalAmount: Number
-  }
+  },
+  status: {
+    type: String,
+    enum: ["open", "closed", "flagged"],
+    default: "open",
+  },
+  hasAgreement: { type: Boolean, default: false },
+  hasDocuments: { type: Boolean, default: false },
+  lastMessageAt: { type: Date },
 });
 
 module.exports = mongoose.model("Conversation", conversationSchema);

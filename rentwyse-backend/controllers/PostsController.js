@@ -76,6 +76,10 @@ exports.listPost = (req, res, next) => {
 
   // Constructing the filter query
   const filterQuery = {};
+
+  // Soft delete – always exclude deleted posts
+  filterQuery.isDeleted = { $ne: true }; // only fetch posts that are not soft-deleted
+
   if (req.query.city) {
     filterQuery.city = { $regex: new RegExp(req.query.city, "i") };
   }
@@ -114,7 +118,7 @@ exports.listPost = (req, res, next) => {
   postQuery
     .then((documents) => {
       fetchedPost = documents;
-      return Post.countDocuments(filterQuery); // Count the filtered documents
+      return Post.countDocuments(filterQuery); // Count the filtered documents (non-deleted only)
     })
     .then((count) => {
       res.status(200).json({
@@ -141,7 +145,10 @@ exports.listPostByUserId = (req, res, next) => {
     return res.status(400).json({ message: "Invalid user ID" });
   }
 
-  const postQuery = Post.find({ creator: userId }); // Filtering the  posts by user ID
+  // Soft delete – filter by creator AND not deleted
+  const filter = { creator: userId, isDeleted: { $ne: true } };
+
+  const postQuery = Post.find(filter); // Filtering the  posts by user ID
   let fetchedPosts;
 
   if (pageSize && currentPage) {
@@ -151,7 +158,7 @@ exports.listPostByUserId = (req, res, next) => {
   postQuery
     .then((documents) => {
       fetchedPosts = documents;
-      return Post.countDocuments({ creator: userId }); // Count only posts by this user
+      return Post.countDocuments(filter); // Count only posts by this user (non-deleted)
     })
     .then((count) => {
       res.status(200).json({
@@ -169,7 +176,8 @@ exports.listPostByUserId = (req, res, next) => {
 
 //Read
 exports.listPostById = (req, res, next) => {
-  Post.findById(req.params.id)
+  // Soft delete – don’t return deleted posts
+  Post.findOne({ _id: req.params.id, isDeleted: { $ne: true } })
     .then((post) => {
       console.log(req.params.id);
       if (post) {
@@ -223,11 +231,14 @@ exports.editPost = (req, res, next) => {
 
   console.log(req, postUpdateData, req.userData.creator);
 
-  // Update the post with the new data
-  Post.updateOne({ _id: postId, creator: req.userData.userId }, postUpdateData)
+  // Optional: prevent editing soft-deleted posts
+  Post.updateOne(
+    { _id: postId, creator: req.userData.userId, isDeleted: { $ne: true } }, // do not edit deleted posts
+    postUpdateData
+  )
     .then((result) => {
       console.log("Update result = ", result);
-      if (result.modifiedCount > 0) {
+      if (result.modifiedCount > 0 || result.nModified > 0) {
         res.status(200).json({ message: "Update Successful!" });
       } else {
         res.status(200).json({ message: "No Change was made" });
@@ -242,11 +253,22 @@ exports.editPost = (req, res, next) => {
 //Delete
 exports.deletePost = (req, res, next) => {
   console.log(req.params._id);
-  Post.deleteOne({ _id: req.params._id, creator: req.userData.userId })
+
+  // Soft delete – mark as deleted instead of removing from DB
+  Post.updateOne(
+    { _id: req.params._id, creator: req.userData.userId, isDeleted: { $ne: true } }, // only active posts
+    { $set: { isDeleted: true, deletedAt: new Date() } } // mark as deleted
+  )
     .then((result) => {
       console.log(result);
-      if (result.deletedCount > 0) {
-        res.status(200).json({ message: "Delete Successful!" });
+
+      // Handle both Mongoose 5 and 6 shapes
+      const modified =
+        result.modifiedCount > 0 ||
+        result.nModified > 0; // fallback for older versions
+
+      if (modified) {
+        res.status(200).json({ message: "Delete Successful!" }); // keep same response text
       } else {
         res
           .status(404)
@@ -267,6 +289,9 @@ exports.listPostSearch = async (req, res, next) => {
 
     const query = {};
 
+    // Soft delete – only search active posts
+    query.isDeleted = { $ne: true };
+
     // if (city) query.city = city;
     //below code is for the search string case-insensitive
     if (city) query.city = { $regex: new RegExp(city, "i") };
@@ -283,3 +308,4 @@ exports.listPostSearch = async (req, res, next) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+

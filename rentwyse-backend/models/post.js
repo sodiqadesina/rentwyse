@@ -21,6 +21,10 @@ const postSchema = mongoose.Schema({
   price: { type: Number, required: true },
   dateListed: { type: Date, required: true },
   dateAvailableForRent: { type: Date, required: true },
+
+    // Soft delete fields
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: { type: Date, default: null },
 });
 
 module.exports = mongoose.model("Post", postSchema);

@@ -6,6 +6,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { AuthService } from 'src/app/auth/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { InquiryDialogComponent } from '../../messaging/Inquiry-dialog/inquiry-dialog.component';
+import { ConfirmationDialogComponent } from '../../messaging/messages/delete-confirmation.component';
 
 
 @Component({
@@ -97,14 +98,34 @@ isDescriptionExpanded(postId: string): boolean {
 
 
 
-onDelete(postId: string){
-  this.isLoading = true;
-  this.postsService.deletePost(postId).subscribe(()=> {
-  this.postsService.getPostsByUserId(this.postPerPage,this.currentPage)
-}, ()=>{
-  this.isLoading = false
-})
+onDelete(postId: string) {
+  const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+    width: '350px',
+    data: {
+      title: 'Delete this listing?',
+      message: 'This will hide the listing from renters. Are you sure you want to continue?'
+    }
+  });
+
+  dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+    if (!confirmed) {
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.postsService.deletePost(postId).subscribe(
+      () => {
+        // Reload the user’s listings after delete
+        this.postsService.getPostsByUserId(this.postPerPage, this.currentPage);
+      },
+      () => {
+        this.isLoading = false;
+      }
+    );
+  });
 }
+
 
 ngOnDestroy(){
   this.postsSub.unsubscribe();

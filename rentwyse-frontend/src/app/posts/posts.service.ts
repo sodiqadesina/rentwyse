@@ -233,7 +233,7 @@ this.http.put(BACKEND_URL + id, postData).subscribe(response =>{
 // }
 // updatedPosts[oldPostIndex] = post;
 // this.posts = updatedPosts;
-this.router.navigate(["/"]); // redirecting the route
+this.router.navigate(["/my-listing"]);
 });
     }
 

@@ -426,14 +426,14 @@
 
                 <p
                   class="documents-empty"
-                  *ngIf="!selectedConversation.agreementDocuments?.length"
+                  *ngIf="!selectedConversation?.agreementDocuments?.length"
                 >
                   No agreement uploaded yet.
                 </p>
 
                 <div
                   class="document-row"
-                  *ngFor="let doc of selectedConversation.agreementDocuments"
+                  *ngFor="let doc of selectedConversation?.agreementDocuments"
                 >
                   <button
                     type="button"
@@ -441,8 +441,9 @@
                     (click)="onDownloadDocument(doc)"
                   >
                     <mat-icon>picture_as_pdf</mat-icon>
-                    <span>{{ doc }}</span>
+                    <span class="document-name" [title]="doc">{{ doc }}</span>
                   </button>
+
                   <button
                     mat-stroked-button
                     color="warn"
@@ -463,14 +464,14 @@
 
                 <p
                   class="documents-empty"
-                  *ngIf="!selectedConversation.signedAgreementDocuments?.length"
+                  *ngIf="!selectedConversation?.signedAgreementDocuments?.length"
                 >
                   No signed agreement uploaded yet.
                 </p>
 
                 <div
                   class="document-row"
-                  *ngFor="let doc of selectedConversation.signedAgreementDocuments"
+                  *ngFor="let doc of selectedConversation?.signedAgreementDocuments"
                 >
                   <button
                     type="button"
@@ -478,8 +479,9 @@
                     (click)="onDownloadDocument(doc)"
                   >
                     <mat-icon>picture_as_pdf</mat-icon>
-                    <span>{{ doc }}</span>
+                    <span class="document-name" [title]="doc">{{ doc }}</span>
                   </button>
+
                   <button
                     mat-stroked-button
                     color="warn"
@@ -492,27 +494,73 @@
               </div>
             </div>
 
+            <!-- Upload form fixed at bottom -->
             <form
               class="upload-form"
               [formGroup]="documentForm"
               (ngSubmit)="onUploadDocuments()"
             >
-              <label class="upload-label">
-                <mat-icon>upload_file</mat-icon>
-                <span>Select files</span>
-                <input
-                  type="file"
-                  formControlName="documents"
-                  multiple
-                  (change)="onFilePicked($event)"
-                />
-              </label>
+              <!-- Role hint -->
+              <p class="upload-hint" *ngIf="isUserPostCreator(); else renterHint">
+                You’re uploading the <strong>agreement</strong> to send to the renter.
+              </p>
+              <ng-template #renterHint>
+                <p class="upload-hint">
+                  You’re uploading the <strong>signed agreement</strong> to send back to
+                  the owner.
+                </p>
+              </ng-template>
 
-              <button mat-raised-button type="submit">
-                Upload
-              </button>
+              <!-- Show *selected* files before upload -->
+              <div class="selected-files" *ngIf="selectedFileNames.length">
+                <div class="selected-files-header">
+                  <mat-icon>attach_file</mat-icon>
+                  <span>
+                    Ready to upload ({{ selectedFileNames.length }})
+                  </span>
+                </div>
+
+                <ul class="selected-files-list">
+                  <li *ngFor="let name of selectedFileNames; let i = index">
+                    <div class="selected-file-main">
+                      <mat-icon>description</mat-icon>
+                      <span class="file-name" [title]="name">{{ name }}</span>
+                    </div>
+
+                    <!-- DELETE PENDING FILE BUTTON -->
+                    <button
+                      type="button"
+                      class="remove-btn"
+                      (click)="removePendingFile(i)"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+
+              <!-- Bottom actions -->
+              <div class="upload-actions">
+                <label class="upload-label">
+                  <mat-icon>upload_file</mat-icon>
+                  <span>Select files</span>
+                  <input
+                    type="file"
+                    formControlName="documents"
+                    multiple
+                    (change)="onFilePicked($event)"
+                  />
+                </label>
+
+                <button mat-raised-button color="primary" type="submit">
+                  Upload
+                </button>
+              </div>
             </form>
           </mat-card>
+
+         
         </div>
       </ng-container>
 

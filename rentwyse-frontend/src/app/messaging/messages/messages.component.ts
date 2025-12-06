@@ -44,8 +44,16 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
   renegotiationForm!: FormGroup;
   renegotiatedPrice: number = 5;
   readonly listingDescriptionWordLimit = 30;
+  pendingFiles: File[] = [];
 
+  get selectedFileNames(): string[] {
+    return this.pendingFiles.map(f => f.name);
+  }
 
+  get hasPendingFiles(): boolean {
+    return this.pendingFiles && this.pendingFiles.length > 0;
+  }
+    
 
   constructor(
     private messageService: MessageService,
@@ -192,6 +200,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
         
       }
       
+      
     
       onDownloadDocument(filename: string) {
         this.messageService.downloadDocument(filename)
@@ -263,23 +272,35 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
     const files = (event.target as HTMLInputElement).files;
     if (files && files.length > 0) {
       this.fileList = files;
+       this.pendingFiles = Array.from(files); 
       // Update the form with a boolean value or file names
       // const fileNames = Array.from(files).map(file => file.name);
       // this.documentForm.patchValue({ documents: fileNames.join(', ') });
       // Note: Do not set the actual FileList or File object in the form control
+    }else {
+      this.fileList = null;
+      this.pendingFiles = [];
     }
   }
 
+  removePendingFile(index: number) {
+    this.pendingFiles.splice(index, 1);
+
+    // Rebuild a FileList-like object if needed
+    if (this.pendingFiles.length === 0) {
+      this.fileList = null;
+    }
+  }
+
+
     onUploadDocuments() {
-      if (!this.fileList || this.fileList.length === 0) {
-        // Handle invalid form or no files selected
-        return;
-      }
+      if (!this.pendingFiles || this.pendingFiles.length === 0) return;
+
       const formData = new FormData();
-      for (let i = 0; i < this.fileList.length; i++) {
-        formData.append('documents', this.fileList[i]);
-      }
-      // Call your service to upload the documents
+      this.pendingFiles.forEach(file => {
+        formData.append('documents', file);
+      });
+      // Call service to upload the documents
       this.messageService.uploadDocuments(this.selectedConversation._id, formData)
       .subscribe(response => {
         // Handle successful upload
@@ -303,8 +324,16 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
 
     
       // Clear the file input
+      this.pendingFiles = [];
       this.fileList = null;
       this.documentForm.reset();
+
+      const input = document.getElementById(
+        'documentsInput'
+      ) as HTMLInputElement | null;
+      if (input) {
+        input.value = '';
+      }
 
       }, error => {
         // Handle error
@@ -336,7 +365,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
         return;
       }
 
-      // 💻 Desktop: anchor under the button, but keep within viewport
+      // Desktop: anchor under the button, but keep within viewport
       const rect = origin.getBoundingClientRect();
 
       // Horizontal: center under the button, clamped to viewport

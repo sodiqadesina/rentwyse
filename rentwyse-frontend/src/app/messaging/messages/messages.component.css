@@ -620,96 +620,215 @@ button[mat-raised-button] {
 /* Documents card */
 
 .documents-card {
-  padding: 0.8rem 1rem 1rem;
-  border-radius: 18px;
-  border: 1px solid #eee;
-  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.section-subtitle {
+  font-size: 0.85rem;
+  color: #7a7a7a;
+  margin-bottom: 1rem;
 }
 
 .documents-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.8rem;
-  margin-top: 0.3rem;
-}
-
-@media (max-width: 768px) {
-  .documents-columns {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  gap: 1.5rem;
 }
 
 .documents-section h4 {
-  margin: 0 0 0.3rem;
-  font-size: 0.95rem;
-  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-
-.documents-section h4 mat-icon {
-  font-size: 18px;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .documents-empty {
-  font-size: 0.85rem;
-  color: #777;
+  font-size: 0.8rem;
+  color: #9a9a9a;
 }
 
 .document-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.4rem;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
 }
 
+/* Button that holds icon + name (takes remaining width) */
 .document-link {
-  border: none;
-  background: none;
-  padding: 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  color: #000;
+  flex: 1;          /* takes all remaining width */
+  min-width: 0;     /* REQUIRED so ellipsis can shrink */
 }
 
 .document-link mat-icon {
-  font-size: 18px;
+  font-size: 1rem;
 }
 
-/* Upload */
+.document-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.85rem;
+  text-align: left;
+}
 
+/* Upload form pinned to bottom */
 .upload-form {
-  margin-top: 0.8rem;
+  margin-top: auto; /* push this whole form to bottom */
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.upload-hint {
+  font-size: 0.78rem;
+  color: #8a8a8a;
+}
+
+/* Selected files preview */
+.selected-files {
+  background-color: #fafafa;
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #f0f0f0;
+}
+
+.selected-files-header {
+  display: flex;
   align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+
+.selected-files-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.selected-files-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  padding: 4px 0;
+
+}
+
+.remove-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.remove-btn mat-icon {
+  font-size: 16px;
+  color: #b82a2a;
+}
+
+.remove-btn:hover mat-icon {
+  color: #ff0000;
+}
+
+
+.selected-files-list mat-icon {
+  font-size: 1rem;
+}
+
+.selected-file-main {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 0;
+}
+
+
+.selected-files-list mat-icon {
+  font-size: 1rem;
+}
+
+.file-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Bottom actions  */
+.upload-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
 }
 
 .upload-label {
-  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
   border-radius: 999px;
-  border: 1px dashed #ccc;
-  background: #fafafa;
-  font-size: 0.85rem;
+  border: 1px dashed #c7c7c7;
   cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
-.upload-label input[type='file'] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
+.upload-label mat-icon {
+  font-size: 1rem;
 }
+
+/* Hide native file input */
+.upload-label input[type='file'] {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .documents-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .upload-label {
+    justify-content: center;
+  }
+}
+
 
 /* Empty right panel ------------------------------------------------------ */
 

@@ -155,50 +155,85 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy{
       
       
 
-      onDeleteDocument(filename: string, documentType: 'agreementDocument' | 'signedAgreementDocument') {
+      onDeleteDocument(
+        filename: string,
+        documentType: "agreementDocument" | "signedAgreementDocument"
+      ) {
         const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-          width: '300px',
+          width: "300px",
           data: {
-            title: 'Confirm Deletion',
-            message: 'Are you sure you want to delete this document?'
-          }
+            title: "Confirm Deletion",
+            message: "Are you sure you want to delete this document?",
+          },
         });
 
+        dialogRef.afterClosed().subscribe((confirmed) => {
+          if (!confirmed) return;
 
-        dialogRef.afterClosed().subscribe(confirmed => {
-          if (confirmed) {
-            // User confirmed the deletion
-            // Call service to delete the document
-            this.messageService.deleteDocument(this.selectedConversation._id, filename)
-            .subscribe(response => {
-              // Handle successful deletion
-              console.log('Document deleted:', response);
-              // Remove the document from the UI
-              if (documentType === 'agreementDocument') {
-                this.selectedConversation.agreementDocuments = this.selectedConversation.agreementDocuments.filter((doc: string) => doc !== filename);
-              } else {
-                this.selectedConversation.signedAgreementDocuments = this.selectedConversation.signedAgreementDocuments.filter((doc: string) => doc !== filename);
-              }
+          this.messageService
+            .deleteDocument(this.selectedConversation._id, filename)
+            .subscribe(
+              (response) => {
+                console.log("Document deleted:", response);
 
-              const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-                data: { title: 'Document Delete Update', message: 'Your Document was Deleted successfully!' }
-              });
-        
-              // Handle the dialog close event
-              dialogRef.afterClosed().subscribe(() => {
-                // Redirect or perform other actions
-                // this.router.navigate(["/auth/settings"]);
-              });
-              
-            }, error => {
-              // Handle deletion error
-              console.log(error)
-            });
+                // 🔹 Update selectedConversation locally
+                if (documentType === "agreementDocument") {
+                  this.selectedConversation.agreementDocuments =
+                    this.selectedConversation.agreementDocuments.filter(
+                      (doc: string) => doc !== filename
+                    );
+                } else {
+                  this.selectedConversation.signedAgreementDocuments =
+                    this.selectedConversation.signedAgreementDocuments.filter(
+                      (doc: string) => doc !== filename
+                    );
+                }
+
+                // 🔹 ALSO update the conversation inside the conversations list
+                const convoIndex = this.conversations.findIndex(
+                  (c) => c._id === this.selectedConversation._id
+                );
+
+                if (convoIndex !== -1) {
+                  if (documentType === "agreementDocument") {
+                    this.conversations[convoIndex].agreementDocuments =
+                      this.conversations[convoIndex].agreementDocuments.filter(
+                        (doc: string) => doc !== filename
+                      );
+                  } else {
+                    this.conversations[convoIndex].signedAgreementDocuments =
+                      this.conversations[convoIndex].signedAgreementDocuments.filter(
+                        (doc: string) => doc !== filename
+                      );
+                  }
+
+                  // force change detection-friendly update (optional but nice)
+                  this.conversations[convoIndex] = {
+                    ...this.conversations[convoIndex],
+                  };
+                }
+
+                const successDialog = this.dialog.open(
+                  ConfirmationDialogComponent,
+                  {
+                    data: {
+                      title: "Document Delete Update",
+                      message: "Your Document was deleted successfully!",
+                    },
+                  }
+                );
+
+                successDialog.afterClosed().subscribe(() => {
+                  // no redirect needed
+                });
+              },
+              (error) => {
+                console.log("Error deleting document:", error);
               }
+            );
         });
-
-        
       }
+
       
       
     

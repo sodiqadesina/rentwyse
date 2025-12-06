@@ -39,7 +39,7 @@ Each folder includes its own in-depth documentation — this root README gives t
 
    ![Architecture](images/frontend-architecture-diagram.png)
 
-   Frontend readme https://github.com/sodiqadesina/rentwyse/rentwyse-frontend/README.md
+   Frontend readme [https://github.com/sodiqadesina/rentwyse/rentwyse-frontend/README.md](https://github.com/sodiqadesina/rentwyse/tree/main/rentwyse-frontend)
 
 4. Application Workflow (End-to-End Lifecycle)
 

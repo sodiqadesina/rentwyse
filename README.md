@@ -139,6 +139,7 @@ Rent-wyse/
 
 # Demo:
   - visit https://rentwyse-jkw3.onrender.com for a demo
-  - use testuser1 and/or testuser2 as username and password = Password123! to login 
+  - use testuser1 and/or testuser2 as username and password = Password123! to login
+  - you can now use testuser2 to access the current Admin dashboard just login on the same portal to get to the dashboard ...... documentation coming soon !!!  
   - happy testing 
       

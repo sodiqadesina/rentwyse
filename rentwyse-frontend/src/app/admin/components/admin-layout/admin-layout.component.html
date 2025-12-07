@@ -1,4 +1,11 @@
-<div class="admin-root">
+<div class="admin-root" [class.sidebar-open]="sidebarOpen">
+  <!-- OVERLAY for small screens -->
+  <div
+    class="sidebar-backdrop"
+    *ngIf="sidebarOpen"
+    (click)="closeSidebar()"
+  ></div>
+
   <!-- LEFT SIDEBAR -->
   <aside class="admin-sidebar">
     <div class="sidebar-header">
@@ -12,36 +19,38 @@
     </div>
 
     <nav class="sidebar-nav">
-      <!-- DASHBOARD -->
       <button
         class="nav-item"
         routerLink="/admin"
         routerLinkActive="nav-item-active"
         [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeSidebar()"
       >
         <mat-icon>dashboard</mat-icon>
         <span>Dashboard</span>
       </button>
 
-      <!-- USERS -->
       <button
         class="nav-item"
         routerLink="/admin/users"
         routerLinkActive="nav-item-active"
+        (click)="closeSidebar()"
       >
         <mat-icon>people</mat-icon>
         <span>Users</span>
       </button>
 
-      <!-- POSTS / LISTINGS -->
       <button
         class="nav-item"
         routerLink="/admin/posts"
         routerLinkActive="nav-item-active"
+        (click)="closeSidebar()"
       >
         <mat-icon>home_work</mat-icon>
         <span>Listings</span>
       </button>
+
+      <!-- future items: conversations, kyc, settings, audit, etc. -->
     </nav>
 
     <div class="sidebar-footer">
@@ -61,8 +70,20 @@
     <!-- TOP BAR -->
     <header class="admin-topbar">
       <div class="topbar-left">
-        <h1>Admin</h1>
-        <span class="topbar-subtitle">Control center for Rent-Wyse.</span>
+        <!-- mobile / tablet menu button -->
+        <button
+          type="button"
+          class="topbar-menu-btn"
+          (click)="toggleSidebar()"
+          aria-label="Toggle admin navigation"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <div class="topbar-text">
+          <h1>Admin</h1>
+          <span class="topbar-subtitle">Control center for Rent-Wyse.</span>
+        </div>
       </div>
 
       <div class="topbar-right">

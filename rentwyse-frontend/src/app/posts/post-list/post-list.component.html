@@ -116,10 +116,19 @@
     class="rentals-grid"
     *ngIf="!isLoading && posts.length > 0"
   >
-    <mat-card
-      class="rental-card"
-      *ngFor="let post of posts"
-    >
+      <mat-card
+        class="rental-card"
+        *ngFor="let post of posts"
+        [ngClass]="{ 'rental-card--featured': post.featured }"
+      >
+      <!--  Featured badge -->
+      <div
+        class="rental-featured-banner"
+        *ngIf="post.featured"
+      >
+        <mat-icon>star</mat-icon>
+        <span>Featured</span>
+      </div>
       <!-- Image slider -->
       <div
         class="rental-media"

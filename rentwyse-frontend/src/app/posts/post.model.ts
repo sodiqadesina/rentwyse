@@ -18,5 +18,8 @@ export interface post {
    zipcode: string;
    price: number;
    country: string;
+   featured?: boolean;
+   status?: 'draft' | 'active' | 'flagged' | 'deleted';
+   isDeleted?: boolean;
  }
  

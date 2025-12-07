@@ -11,7 +11,7 @@
     <div class="post-btn">
       <a
         routerLink="/create"
-        class="btn badge text-wrap post-rental-btn"
+        class="btn text-wrap post-rental-btn"
       >
         Post a Rental
       </a>
@@ -42,168 +42,236 @@
   </div>
 
   <!-- Listings grid -->
-  <div
-    class="listings-grid"
-    *ngIf="!isLoading && posts.length > 0"
+<div
+  class="listings-grid"
+  *ngIf="!isLoading && posts.length > 0"
+>
+  <mat-card
+    class="listing-card"
+    *ngFor="let post of posts"
+    [ngClass]="{
+      'listing-card--featured': post.featured && post.status !== 'deleted' && !post.isDeleted,
+      'listing-card--flagged': post.status === 'flagged',
+      'listing-card--deleted': post.status === 'deleted' || post.isDeleted
+    }"
   >
-    <mat-card
-      class="listing-card"
-      *ngFor="let post of posts"
+    <!-- IMAGE + BADGES -->
+    <div
+      class="listing-image-wrapper"
+      *ngIf="post.imagePath && post.imagePath.length > 0"
     >
-      <!-- Image / slider -->
-      <div
-        class="listing-image-wrapper"
-        *ngIf="post.imagePath && post.imagePath.length > 0"
+      <!-- BADGES OVER IMAGE -->
+      <div class="listing-badges">
+        <span
+          class="badge badge-featured"
+          *ngIf="post.featured && !(post.status === 'deleted' || post.isDeleted)"
+        >
+          ★ Featured
+        </span>
+
+        <span
+          class="badge badge-flagged"
+          *ngIf="post.status === 'flagged'"
+        >
+          Flagged by admin
+        </span>
+
+        <span
+          class="badge badge-deleted"
+          *ngIf="post.status === 'deleted' || post.isDeleted"
+        >
+          Deleted
+        </span>
+      </div>
+
+      <img
+        class="listing-image"
+        [src]="post.imagePath[currentImageIndices[post._id] || 0]"
+        [alt]="post.title"
+      />
+
+      <!-- Slider controls -->
+      <button
+        mat-icon-button
+        class="slider-nav-button left"
+        (click)="previousImage(post._id)"
       >
-        <img
-          class="listing-image"
-          [src]="post.imagePath[currentImageIndices[post._id] || 0]"
-          [alt]="post.title"
-        />
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        class="slider-nav-button right"
+        (click)="nextImage(post._id, post.imagePath.length)"
+      >
+        <mat-icon>chevron_right</mat-icon>
+      </button>
 
-        <!-- Slider controls -->
-        <button
-          mat-icon-button
-          class="slider-nav-button left"
-          (click)="previousImage(post._id)"
-        >
-          <mat-icon>chevron_left</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          class="slider-nav-button right"
-          (click)="nextImage(post._id, post.imagePath.length)"
-        >
-          <mat-icon>chevron_right</mat-icon>
-        </button>
+      <!-- Counter -->
+      <div class="image-counter">
+        <span>
+          {{ (currentImageIndices[post._id] || 0) + 1 }}
+          /
+          {{ post.imagePath.length }}
+        </span>
+      </div>
+    </div>
 
-        <!-- Counter -->
-        <div class="image-counter">
-          <span>
-            {{ (currentImageIndices[post._id] || 0) + 1 }}
-            /
-            {{ post.imagePath.length }}
+    <!-- If there’s no image, still show badges at the top -->
+    <div
+      class="listing-no-image-badges"
+      *ngIf="!post.imagePath || post.imagePath.length === 0"
+    >
+      <div class="listing-badges">
+        <span
+          class="badge badge-featured"
+          *ngIf="post.featured && !(post.status === 'deleted' || post.isDeleted)"
+        >
+          ★ Featured
+        </span>
+
+        <span
+          class="badge badge-flagged"
+          *ngIf="post.status === 'flagged'"
+        >
+          Flagged by admin
+        </span>
+
+        <span
+          class="badge badge-deleted"
+          *ngIf="post.status === 'deleted' || post.isDeleted"
+        >
+          Deleted
+        </span>
+      </div>
+    </div>
+
+    <!-- Card body -->
+    <mat-card-content class="listing-content">
+      <div class="listing-header-row">
+        <h2 class="listing-title">
+          {{ post.title }}
+        </h2>
+        <div class="listing-price">
+          <span class="price-amount">
+            ${{ post.price }}
           </span>
+          <span class="price-unit">/month</span>
         </div>
       </div>
 
-      <!-- Card body -->
-      <mat-card-content class="listing-content">
-        <div class="listing-header-row">
-          <h2 class="listing-title">
-            {{ post.title }}
-          </h2>
-          <div class="listing-price">
-            <span class="price-amount">
-              ${{ post.price }}
-            </span>
-            <span class="price-unit">/month</span>
-          </div>
-        </div>
+      <div class="listing-location-row">
+        <mat-icon>place</mat-icon>
+        <span>
+          {{ post.address }},
+          {{ post.city }},
+          {{ post.province }},
+          {{ post.zipcode }},
+          {{ post.country }}
+        </span>
+      </div>
 
-        <div class="listing-location-row">
-          <mat-icon>place</mat-icon>
+      <div class="listing-meta-row">
+        <div class="meta-pill">
+          <mat-icon>king_bed</mat-icon>
+          <span>{{ post.bedroom }} bed</span>
+        </div>
+        <div class="meta-pill">
+          <mat-icon>bathtub</mat-icon>
+          <span>{{ post.bathroom }} bath</span>
+        </div>
+        <div class="meta-pill">
+          <mat-icon>house</mat-icon>
+          <span>{{ post.rentType }}</span>
+        </div>
+      </div>
+
+      <div class="listing-flags-row">
+        <div class="flag-pill" [class.flag-on]="post.furnished">
+          <mat-icon>check_circle_outline</mat-icon>
+          <span>Furnished</span>
+        </div>
+        <div class="flag-pill" [class.flag-on]="post.parkingAvailable">
+          <mat-icon>directions_car</mat-icon>
+          <span>Parking</span>
+        </div>
+      </div>
+
+      <div class="listing-description">
+        <p class="description-text">
+          {{
+            isDescriptionExpanded(post._id)
+              ? post.description
+              : (post.description | slice: 0:180)
+          }}
+          <span
+            *ngIf="(post.description?.length || 0) > 180 && !isDescriptionExpanded(post._id)"
+            >...</span
+          >
+        </p>
+
+        <button
+          *ngIf="(post.description?.length || 0) > 180"
+          type="button"
+          class="description-toggle"
+          (click)="toggleDescription(post._id)"
+        >
+          {{ isDescriptionExpanded(post._id) ? 'Show less' : 'Show more' }}
+        </button>
+      </div>
+
+      <div class="listing-dates-row">
+        <div class="date-item">
+          <mat-icon>event</mat-icon>
           <span>
-            {{ post.address }},
-            {{ post.city }},
-            {{ post.province }},
-            {{ post.zipcode }},
-            {{ post.country }}
+            Listed:
+            {{ post.dateListed | date: 'MMM d, y' }}
           </span>
         </div>
-
-        <div class="listing-meta-row">
-          <div class="meta-pill">
-            <mat-icon>king_bed</mat-icon>
-            <span>{{ post.bedroom }} bed</span>
-          </div>
-          <div class="meta-pill">
-            <mat-icon>bathtub</mat-icon>
-            <span>{{ post.bathroom }} bath</span>
-          </div>
-          <div class="meta-pill">
-            <mat-icon>house</mat-icon>
-            <span>{{ post.rentType }}</span>
-          </div>
+        <div class="date-item">
+          <mat-icon>event_available</mat-icon>
+          <span>
+            Available:
+            {{ post.dateAvailableForRent | date: 'MMM d, y' }}
+          </span>
         </div>
+      </div>
+    </mat-card-content>
 
-        <div class="listing-flags-row">
-          <div class="flag-pill" [class.flag-on]="post.furnished">
-            <mat-icon>check_circle_outline</mat-icon>
-            <span>Furnished</span>
-          </div>
-          <div class="flag-pill" [class.flag-on]="post.parkingAvailable">
-            <mat-icon>directions_car</mat-icon>
-            <span>Parking</span>
-          </div>
-        </div>
-
-        <div class="listing-description">
-          <p class="description-text">
-            {{
-              isDescriptionExpanded(post._id)
-                ? post.description
-                : (post.description | slice: 0:180)
-            }}
-            <span
-              *ngIf="(post.description?.length || 0) > 180 && !isDescriptionExpanded(post._id)"
-              >...</span
-            >
-          </p>
-
-         <button
-            *ngIf="(post.description?.length || 0) > 180"
-            type="button"
-            class="description-toggle"
-            (click)="toggleDescription(post._id)"
-          >
-            {{ isDescriptionExpanded(post._id) ? 'Show less' : 'Show more' }}
-          </button>
-        </div>
-
-
-        <div class="listing-dates-row">
-          <div class="date-item">
-            <mat-icon>event</mat-icon>
-            <span>
-              Listed:
-              {{ post.dateListed | date: 'MMM d, y' }}
-            </span>
-          </div>
-          <div class="date-item">
-            <mat-icon>event_available</mat-icon>
-            <span>
-              Available:
-              {{ post.dateAvailableForRent | date: 'MMM d, y' }}
-            </span>
-          </div>
-        </div>
-      </mat-card-content>
-
-      <!-- Actions -->
-      <mat-card-actions
-        class="listing-actions"
-        *ngIf="userIsAuth && userId === post.creator"
+    <!-- Actions (normal: NOT deleted) -->
+    <mat-card-actions
+      class="listing-actions"
+      *ngIf="userIsAuth && userId === post.creator && !(post.status === 'deleted' || post.isDeleted)"
+    >
+      <a
+        mat-button
+        color="primary"
+        [routerLink]="['/edit', post._id]"
       >
-        <a
-          mat-button
-          color="primary"
-          [routerLink]="['/edit', post._id]"
-        >
-          <mat-icon>edit</mat-icon>
-          Edit
-        </a>
-        <button
-          mat-button
-          color="warn"
-          (click)="onDelete(post._id)"
-        >
-          <mat-icon>delete</mat-icon>
-          Delete
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </div>
+        <mat-icon>edit</mat-icon>
+        Edit
+      </a>
+      <button
+        mat-button
+        color="warn"
+        (click)="onDelete(post._id)"
+      >
+        <mat-icon>delete</mat-icon>
+        Delete
+      </button>
+    </mat-card-actions>
+
+    <!-- Deleted state: show message only -->
+    <div
+      class="listing-actions listing-actions--disabled"
+      *ngIf="userIsAuth && userId === post.creator && (post.status === 'deleted' || post.isDeleted)"
+    >
+      <span>
+        This listing has been deleted and is no longer visible to renters.
+      </span>
+    </div>
+  </mat-card>
+</div>
+
 
   <!-- Paginator -->
   <div

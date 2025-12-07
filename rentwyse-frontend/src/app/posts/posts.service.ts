@@ -53,6 +53,9 @@ export class PostsService {
                             zipcode: post.zipcode,
                             country: post.country,
                             price: post.price,
+                            status: post.status,
+                            isDeleted: post.isDeleted,
+                            featured: post.featured, 
                         };
                     }),
                     maxPost: postData.maxPost
@@ -93,6 +96,9 @@ export class PostsService {
                             price: post.price,
                             zipcode: post.zipcode,
                             country: post.country,
+                            status: post.status,
+                            isDeleted: post.isDeleted,
+                            featured: post.featured,
                         };
                     }),
                     maxPost: postData.maxPost

@@ -316,12 +316,8 @@ exports.getPosts = async (req, res) => {
       status,
       city,
       search, // optional: search by title
+      featured,
     } = req.query;
-
-    logger.info("GET /api/admin/posts", {
-      adminId: req.user && req.user._id,
-      query: req.query,
-    });
 
     const pageNum = parseInt(page, 10) || 1;
     const limit = parseInt(pageSize, 10) || 20;
@@ -334,22 +330,36 @@ exports.getPosts = async (req, res) => {
     if (search) {
       filter.title = new RegExp(search, "i");
     }
+    if (typeof featured !== "undefined" && featured !== "") {
+      filter.featured = featured === "true";
+    }
 
-    const [posts, total] = await Promise.all([
+    const [rawPosts, total] = await Promise.all([
       Post.find(filter)
-        .sort({ createdAt: -1 })
+        .sort({ dateListed: -1, createdAt: -1 }) // prefer real listing date if present
         .skip(skip)
         .limit(limit)
         .populate("creator", "username email")
-        .select("title city rent status featured createdAt updatedAt"),
+        // IMPORTANT: include dateListed here
+        .select("title city price rent status featured dateListed createdAt updatedAt")
+        .lean(),
       Post.countDocuments(filter),
     ]);
 
-    logger.info("GET /api/admin/posts success", {
-      total,
-      page: pageNum,
-      pageSize: limit,
-    });
+    const posts = rawPosts.map((p) => ({
+      ...p,
+      // normalise rent (this was already working fine)
+      rent:
+        typeof p.rent === "number"
+          ? p.rent
+          : typeof p.price === "number"
+          ? p.price
+          : null,
+
+      // *** KEY FIX ***
+      // Use dateListed when available, fall back to createdAt otherwise
+      createdAt: p.dateListed || p.createdAt || null,
+    }));
 
     res.json({
       posts,
@@ -358,7 +368,7 @@ exports.getPosts = async (req, res) => {
       pageSize: limit,
     });
   } catch (err) {
-    logger.error("getPosts error:", err);
+    console.error("getPosts error:", err);
     res.status(500).json({ message: "Failed to fetch posts." });
   }
 };

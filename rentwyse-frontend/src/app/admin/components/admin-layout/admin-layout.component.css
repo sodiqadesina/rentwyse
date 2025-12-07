@@ -247,6 +247,17 @@
     position: relative;
   }
 
+   .sidebar-footer {
+    flex-direction: row;                         /* buttons side by side */
+    align-items: center;
+    gap: 8px;
+    padding-bottom: env(safe-area-inset-bottom, 16px); /* avoid iOS bottom bar */
+  }
+
+  .sidebar-footer button {
+    flex: 1 1 0;                                 /* each takes half row */
+  }
+
   .admin-sidebar {
     position: fixed;
     top: 0;

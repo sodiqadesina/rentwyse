@@ -1,0 +1,572 @@
+/* ===== PAGE LAYOUT ===== */
+
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ===== HEADER ===== */
+
+.admin-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.admin-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.icon-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: #cbd5f5;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.icon-link mat-icon {
+  font-size: 18px;
+}
+
+/* ===========================
+   POSTS FILTER BAR (PILLS)
+   – same scheme as Users
+=========================== */
+
+.posts-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #020b24;
+  border: 1px solid #1e293b;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.7);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 170px;
+}
+
+.filter-field--grow {
+  flex: 1 1 auto;
+}
+
+.filter-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+}
+
+/* pill container */
+
+.filter-control {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #020617;
+  border: 1px solid #334155;
+}
+
+.filter-control--with-icon {
+  padding-left: 8px;
+}
+
+.filter-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  color: #6b7280;
+}
+
+.filter-icon mat-icon {
+  font-size: 18px;
+}
+
+/* text input */
+
+.filter-control input {
+  flex: 1 1 auto;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #f9fafb;
+  font-size: 13px;
+}
+
+.filter-control input::placeholder {
+  color: #9ca3af;
+}
+
+/* select */
+
+.filter-control select {
+  flex: 1 1 auto;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  color: #f9fafb;
+  font-size: 13px;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.filter-control select option {
+  background-color: #020617 !important;
+  color: #f9fafb !important;
+}
+
+.filter-control select option[value=""] {
+  color: #e5e7eb;
+}
+
+/* custom arrow */
+
+.filter-control--select {
+  position: relative;
+  padding-right: 32px;
+}
+
+.filter-control--select::after {
+  content: "▾";
+  position: absolute;
+  right: 12px;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* ACTION BUTTONS */
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.filter-btn {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+.filter-btn--primary {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #f9fafb;
+}
+
+.filter-btn--primary:hover {
+  background: #6366f1;
+  border-color: #6366f1;
+  transform: translateY(-1px);
+}
+
+.filter-btn--ghost {
+  background: transparent;
+  border-color: #475569;
+  color: #e5e7eb;
+}
+
+.filter-btn--ghost:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+@media (max-width: 900px) {
+  .posts-filters {
+    align-items: stretch;
+  }
+
+  .filter-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* ===== QUICK FILTER CHIPS ===== */
+
+.posts-quick-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.quick-chip {
+  border-radius: 999px;
+  border: 1px solid #1f2937;
+  background: #020617;
+  color: #e5e7eb;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.quick-chip:hover {
+  border-color: #4f46e5;
+  background: rgba(79, 70, 229, 0.15);
+}
+
+.quick-chip--active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #f9fafb;
+}
+
+.quick-meta {
+  margin-left: 8px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* =======================
+   TABLE CARD – SAME AS USERS
+======================= */
+
+.posts-table-card {
+  padding: 10px 0 4px;
+  border-radius: 10px;
+  background: #020617;
+  border: 1px solid #111827;
+  color: #e5e7eb;
+}
+
+.table-toolbar {
+  padding: 0 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolbar-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar-title {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.toolbar-subtitle {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* ===== TABLE LOOK – SAME AS USERS ===== */
+
+.table-container {
+  overflow-x: auto;
+  padding: 0 4px;
+}
+
+/* make all mat table surfaces transparent */
+.posts-table-card .mat-mdc-table,
+.posts-table-card .mat-mdc-row,
+.posts-table-card .mat-mdc-header-row,
+.posts-table-card .mat-mdc-cell,
+.posts-table-card .mat-mdc-header-cell {
+  background-color: transparent !important;
+  color: #e5e7eb !important;
+}
+
+/* force layout & prevent horizontal scroll */
+.posts-table {
+  /* width: 100%; */
+  table-layout: fixed !important;
+}
+
+/* header cells (transparent row, same border as users) */
+.posts-table th.mat-mdc-header-cell {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af !important;
+  border-bottom: 1px solid #1f2937;
+  background: transparent !important;
+}
+
+/* body cells */
+.posts-table td.mat-mdc-cell {
+  font-size: 13px;
+  border-bottom: 1px solid #020617;
+}
+
+/* padding */
+.posts-table th.mat-mdc-header-cell,
+.posts-table td.mat-mdc-cell {
+  padding: 10px 14px;
+}
+
+/* striping – same as users */
+.posts-table tr.mat-mdc-row:nth-child(even) td {
+  background-color: #050a19 !important;
+}
+.posts-table tr.mat-mdc-row:nth-child(odd) td {
+  background-color: #020617 !important;
+}
+
+/* hover – same as users */
+.posts-table tr.mat-mdc-row:hover td {
+  background-color: #111827 !important;
+}
+
+/* ===== TITLE TRUNCATION ===== */
+
+.post-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-title {
+  display: block;
+  max-width: 140px; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #e5e7eb;
+}
+
+.post-meta {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* also constrain the first column width a bit */
+.posts-table th.mat-mdc-header-cell:first-child,
+.posts-table td.mat-mdc-cell:first-child {
+  max-width: 150px;
+  width: 140px;
+  overflow: hidden;
+}
+
+/* ===== OWNER CELL ===== */
+
+.creator-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.creator-name {
+  font-weight: 500;
+}
+
+.creator-email {
+  font-size: 11px;
+  color: #a5b4fc;
+}
+
+.muted {
+  color: #6b7280;
+}
+
+/* ===== FEATURED PILL ===== */
+
+.featured-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #334155;
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.featured-pill mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.featured-pill--on {
+  border-color: #facc15;
+  background: rgba(250, 204, 21, 0.08);
+  color: #fde68a;
+}
+
+/* ===== STATUS PILLS ===== */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid #334155;
+  background: #020617;
+}
+
+.pill-status {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pill-active {
+  border-color: #22c55e;
+  color: #bbf7d0;
+}
+
+.pill-draft {
+  border-color: #6b7280;
+  color: #e5e7eb;
+}
+
+.pill-flagged {
+  border-color: #f97316;
+  color: #fed7aa;
+}
+
+.pill-deleted {
+  border-color: #ef4444;
+  color: #fecaca;
+}
+
+/* ===== ROW ACTION BUTTONS ===== */
+
+.actions-group {
+  display: flex;
+  gap: 6px;
+}
+
+.small-btn {
+  font-size: 11px !important;
+  padding: 2px 10px !important;
+  border-radius: 999px !important;
+}
+
+.small-btn.danger {
+  border-color: #ef4444 !important;
+  color: #fecaca !important;
+}
+
+.small-btn.subtle {
+  border-color: #4b5563 !important;
+  color: #e5e7eb !important;
+}
+
+/* ===== EMPTY STATE ===== */
+
+.empty-state {
+  padding: 40px 16px 32px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.empty-state h3 {
+  margin: 6px 0;
+  font-size: 16px;
+  color: #e5e7eb;
+}
+
+.empty-state mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 8px;
+}
+
+/* ===== PAGINATOR – SAME AS USERS ===== */
+
+mat-paginator {
+  border-top: 1px solid #111827;
+  background-color: #1f2937;
+}
+
+/* local paginator styling */
+:host ::ng-deep .mat-mdc-paginator {
+  color: #f9fafb !important;
+}
+
+:host ::ng-deep .mat-mdc-paginator-range-label {
+  color: #f9fafb !important;
+}
+
+:host ::ng-deep .mat-mdc-select-value-text {
+  color: #f9fafb !important;
+}
+
+:host ::ng-deep .mat-mdc-select-arrow svg {
+  fill: #f9fafb !important;
+}
+
+:host ::ng-deep .mat-mdc-icon-button {
+  color: #f9fafb !important;
+}
+
+:host ::ng-deep .mat-mdc-paginator .mat-mdc-icon-button {
+  color: #9ca3af !important;
+}
+
+:host ::ng-deep
+  .mat-mdc-form-field
+  .mat-mdc-paginator-page-size-select {
+  color: #9ca3af !important;
+}
+
+:host ::ng-deep .mat-mdc-paginator .mat-mdc-icon-button mat-icon {
+  color: #9ca3af !important;
+  fill: #9ca3af !important;
+}
+
+:host ::ng-deep .mat-mdc-paginator .mat-mdc-icon-button svg {
+  fill: #9ca3af !important;
+  stroke: #9ca3af !important;
+}
+
+/* ===== RESPONSIVE EXTRAS ===== */
+
+@media (max-width: 960px) {
+  .posts-quick-filters {
+    flex-wrap: wrap;
+  }
+}

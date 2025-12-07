@@ -1,0 +1,314 @@
+<div class="admin-page">
+  <!-- HEADER -->
+  <div class="admin-header">
+    <div>
+      <h2>Posts</h2>
+      <p class="subtitle">
+        Moderate listings, visibility, and featured status across the platform.
+      </p>
+    </div>
+
+    <button class="icon-link" type="button" (click)="loadPosts()">
+      <mat-icon fontIcon="refresh"></mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <!-- FILTER BAR (PILL STYLE, PURE HTML/CSS) -->
+  <div class="posts-filters">
+    <!-- SEARCH -->
+    <div class="filter-field filter-field--grow">
+      <label class="filter-label">Search (title / owner)</label>
+      <div class="filter-control filter-control--with-icon">
+        <span class="filter-icon">
+          <mat-icon fontIcon="search"></mat-icon>
+        </span>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="onApplyFilters()"
+          placeholder="e.g. Tesla / basement / sina77"
+        />
+      </div>
+    </div>
+
+    <!-- STATUS -->
+    <div class="filter-field">
+      <label class="filter-label">Status</label>
+      <div class="filter-control filter-control--select">
+        <select [(ngModel)]="filterStatus">
+          <option value="">All</option>
+          <option value="active">Active</option>
+          <option value="draft">Draft</option>
+          <option value="flagged">Flagged</option>
+          <option value="deleted">Deleted</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- FEATURED -->
+    <div class="filter-field">
+      <label class="filter-label">Featured</label>
+      <div class="filter-control filter-control--select">
+        <select [(ngModel)]="filterFeatured">
+          <option value="">All</option>
+          <option value="true">Featured</option>
+          <option value="false">Not featured</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- CITY -->
+    <div class="filter-field">
+      <label class="filter-label">City</label>
+      <div class="filter-control">
+        <input
+          type="text"
+          [(ngModel)]="filterCity"
+          (keyup.enter)="onApplyFilters()"
+          placeholder="e.g. Kitchener"
+        />
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="filter-actions">
+      <button
+        type="button"
+        class="filter-btn filter-btn--primary"
+        (click)="onApplyFilters()"
+      >
+        Apply
+      </button>
+
+      <button
+        type="button"
+        class="filter-btn filter-btn--ghost"
+        (click)="onClearFilters()"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- QUICK FILTER CHIPS -->
+  <div class="posts-quick-filters">
+    <button
+      class="quick-chip"
+      [class.quick-chip--active]="
+        !filterStatus && !filterFeatured && !filterCity && !searchTerm
+      "
+      (click)="filterStatus=''; filterFeatured=''; filterCity=''; searchTerm=''; onApplyFilters()"
+    >
+      All
+    </button>
+
+    <button
+      class="quick-chip"
+      [class.quick-chip--active]="filterStatus === 'active'"
+      (click)="filterStatus='active'; filterFeatured=''; onApplyFilters()"
+    >
+      Active
+    </button>
+
+    <button
+      class="quick-chip"
+      [class.quick-chip--active]="filterStatus === 'flagged'"
+      (click)="filterStatus='flagged'; filterFeatured=''; onApplyFilters()"
+    >
+      Flagged
+    </button>
+
+    <button
+      class="quick-chip"
+      [class.quick-chip--active]="filterStatus === 'deleted'"
+      (click)="filterStatus='deleted'; filterFeatured=''; onApplyFilters()"
+    >
+      Deleted
+    </button>
+
+    <button
+      class="quick-chip"
+      [class.quick-chip--active]="filterFeatured === 'true'"
+      (click)="filterFeatured='true'; filterStatus=''; onApplyFilters()"
+    >
+      Featured only
+    </button>
+
+    <span class="quick-meta">
+      {{ totalPosts }} total · {{ posts.length }} shown
+    </span>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="posts-table-card">
+    <div class="table-toolbar">
+      <div class="toolbar-left">
+        <span class="toolbar-title">Post List</span>
+        <span class="toolbar-subtitle">
+          Monitor listing health and take action quickly.
+        </span>
+      </div>
+
+      <mat-progress-spinner
+        *ngIf="isLoading"
+        diameter="26"
+        mode="indeterminate"
+      ></mat-progress-spinner>
+    </div>
+
+    <div class="table-container">
+      <table
+        mat-table
+        [dataSource]="posts"
+        class="posts-table mat-elevation-z1"
+      >
+        <!-- TITLE -->
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>Title</th>
+          <td mat-cell *matCellDef="let post">
+            <div class="post-main">
+              <div class="post-title" [title]="post.title">
+                {{ post.title }}
+              </div>
+              <div class="post-meta">
+                ID: {{ post._id | slice : 0 : 8 }}… ·
+                {{ post.city || 'Unknown city' }}
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- CITY -->
+        <ng-container matColumnDef="city">
+          <th mat-header-cell *matHeaderCellDef>City</th>
+          <td mat-cell *matCellDef="let post">
+            {{ post.city || '—' }}
+          </td>
+        </ng-container>
+
+        <!-- RENT -->
+        <ng-container matColumnDef="rent">
+          <th mat-header-cell *matHeaderCellDef>Rent</th>
+          <td mat-cell *matCellDef="let post">
+            <span *ngIf="post.rent != null; else noRent">
+              ${{ post.rent | number : '1.0-0' }}/month
+            </span>
+            <ng-template #noRent> — </ng-template>
+          </td>
+        </ng-container>
+
+        <!-- STATUS -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let post">
+            <span
+              class="pill pill-status"
+              [ngClass]="{
+                'pill-active': post.status === 'active',
+                'pill-draft': post.status === 'draft',
+                'pill-flagged': post.status === 'flagged',
+                'pill-deleted': post.status === 'deleted'
+              }"
+            >
+              {{ post.status | uppercase }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- FEATURED -->
+        <ng-container matColumnDef="featured">
+          <th mat-header-cell *matHeaderCellDef>Featured</th>
+          <td mat-cell *matCellDef="let post">
+            <button
+              type="button"
+              class="featured-pill"
+              [class.featured-pill--on]="post.featured"
+              (click)="toggleFeatured(post)"
+            >
+              <mat-icon fontIcon="star"></mat-icon>
+              <span>{{ post.featured ? 'Featured' : 'Normal' }}</span>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- OWNER -->
+        <ng-container matColumnDef="creator">
+          <th mat-header-cell *matHeaderCellDef>Owner</th>
+          <td mat-cell *matCellDef="let post">
+            <div class="creator-cell" *ngIf="post.creator; else noCreator">
+              <div class="creator-name">
+                {{ post.creator?.username }}
+              </div>
+              <div class="creator-email">
+                {{ post.creator?.email }}
+              </div>
+            </div>
+            <ng-template #noCreator>
+              <span class="muted">—</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <!-- CREATED -->
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let post">
+            <ng-container *ngIf="post.createdAt; else noCreated">
+              {{ post.createdAt | date : 'MMM d, y' }}
+            </ng-container>
+            <ng-template #noCreated>—</ng-template>
+          </td>
+        </ng-container>
+
+
+        <!-- ACTIONS -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let post">
+            <div class="actions-group">
+              <button
+                mat-stroked-button
+                class="small-btn danger"
+                (click)="setStatus(post, 'flagged')"
+              >
+                Flag
+              </button>
+              <button
+                mat-stroked-button
+                class="small-btn"
+                (click)="setStatus(post, 'active')"
+              >
+                Set Active
+              </button>
+              <button
+                mat-stroked-button
+                class="small-btn subtle"
+                (click)="setStatus(post, 'deleted')"
+              >
+                Delete
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <div *ngIf="!isLoading && posts.length === 0" class="empty-state">
+        <mat-icon fontIcon="filter_alt_off"></mat-icon>
+        <h3>No posts match these filters</h3>
+        <p>Try adjusting the filters or clearing them to see more posts.</p>
+      </div>
+    </div>
+
+    <mat-paginator
+      [length]="totalPosts"
+      [pageIndex]="pageIndex"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 20, 50]"
+      (page)="onPageChange($event)"
+    ></mat-paginator>
+  </div>
+</div>

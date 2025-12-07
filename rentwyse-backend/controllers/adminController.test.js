@@ -297,46 +297,97 @@ describe("AdminController - updateUserRole", () => {
   });
 });
 
+
 describe("AdminController - getPosts", () => {
   it("should return paginated posts and total count", async () => {
+    const req = {
+      userData: { userId: "admin123", role: "admin" },
+      query: { page: "1", pageSize: "10", status: "active" },
+    };
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
     const mockPosts = [
       {
         _id: "post1",
-        title: "Listing 1",
+        title: "Post One",
         city: "Waterloo",
+        price: 1200,
         status: "active",
+        featured: false,
+        createdAt: "2025-12-01T00:00:00.000Z",
+        updatedAt: "2025-12-05T00:00:00.000Z",
+        dateListed: "2025-11-28T00:00:00.000Z",
+        creator: {
+          _id: "user1",
+          username: "sina77",
+          email: "sina@example.com",
+        },
       },
       {
         _id: "post2",
-        title: "Listing 2",
+        title: "Post Two",
         city: "Kitchener",
+        price: 1500,
         status: "active",
+        featured: true,
+        createdAt: "2025-12-02T00:00:00.000Z",
+        updatedAt: "2025-12-06T00:00:00.000Z",
+        dateListed: null,
+        creator: {
+          _id: "user2",
+          username: "testuser",
+          email: "test@example.com",
+        },
       },
     ];
 
-    const mockPostQuery = {
-      sort: jest.fn().mockReturnThis(),
-      skip: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      populate: jest.fn().mockReturnThis(),
-      select: jest.fn().mockResolvedValue(mockPosts),
-    };
-    Post.find.mockReturnValue(mockPostQuery);
-    Post.countDocuments.mockResolvedValue(2);
+    // --- mock the query chain, including .lean() ---
+    const mockLean = jest.fn().mockResolvedValue(mockPosts);
+    const mockSelect = jest.fn().mockReturnValue({ lean: mockLean });
+    const mockPopulate = jest.fn().mockReturnValue({ select: mockSelect });
+    const mockLimit = jest.fn().mockReturnValue({ populate: mockPopulate });
+    const mockSkip = jest.fn().mockReturnValue({ limit: mockLimit });
+    const mockSort = jest.fn().mockReturnValue({ skip: mockSkip });
 
-    const req = {
-      query: { page: "1", pageSize: "10", status: "active" },
-      user: { _id: "admin123" },
-    };
-    const res = createMockRes();
+    Post.find = jest.fn().mockReturnValue({
+      sort: mockSort,
+    });
+
+    Post.countDocuments = jest.fn().mockResolvedValue(2);
 
     await adminController.getPosts(req, res);
 
+    // filter passed into find / count
     expect(Post.find).toHaveBeenCalledWith({ status: "active" });
     expect(Post.countDocuments).toHaveBeenCalledWith({ status: "active" });
 
+    // we expect controller to normalise rent and createdAt/dateListed
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      posts: mockPosts,
+      posts: expect.arrayContaining([
+        expect.objectContaining({
+          _id: "post1",
+          title: "Post One",
+          city: "Waterloo",
+          rent: 1200, // mapped from price
+          status: "active",
+          featured: false,
+          createdAt: "2025-11-28T00:00:00.000Z", // dateListed override
+        }),
+        expect.objectContaining({
+          _id: "post2",
+          title: "Post Two",
+          city: "Kitchener",
+          rent: 1500,
+          status: "active",
+          featured: true,
+          createdAt: "2025-12-02T00:00:00.000Z", // falls back to createdAt
+        }),
+      ]),
       total: 2,
       page: 1,
       pageSize: 10,

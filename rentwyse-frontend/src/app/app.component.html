@@ -1,11 +1,15 @@
 <div class="app-shell">
-  <app-header></app-header>
+  <!-- Hide header on admin routes -->
+  <app-header *ngIf="!isAdminRoute"></app-header>
 
   <main class="app-content">
-    <!-- <mat-spinner *ngIf="isLoading | async"></mat-spinner> -->
-    <app-notification></app-notification>
+    <!-- Hide notifications on admin routes too (optional) -->
+    <app-notification *ngIf="!isAdminRoute"></app-notification>
+
+    <!-- Admin pages and normal pages both render here -->
     <router-outlet></router-outlet>
   </main>
 
-  <app-footer></app-footer>
+  <!-- Hide footer on admin routes -->
+  <app-footer *ngIf="!isAdminRoute"></app-footer>
 </div>

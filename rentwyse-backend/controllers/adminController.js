@@ -361,12 +361,12 @@ exports.getPosts = async (req, res) => {
       createdAt: p.dateListed || p.createdAt || null,
     }));
 
-    res.json({
-      posts,
-      total,
-      page: pageNum,
-      pageSize: limit,
-    });
+    res.status(200).json({
+    posts,
+    total,
+    page: pageNum,
+    pageSize: limit,
+  });
   } catch (err) {
     console.error("getPosts error:", err);
     res.status(500).json({ message: "Failed to fetch posts." });

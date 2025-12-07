@@ -1,0 +1,559 @@
+/* =========== PAGE LAYOUT =========== */
+
+.users-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* =========== HEADER =========== */
+
+.users-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.users-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.refresh-btn mat-icon {
+  margin-right: 4px;
+}
+
+/* =========== METRICS =========== */
+
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metric-card {
+  border-radius: 10px;
+  background: #020617;
+  border: 1px solid #111827;
+  padding: 10px 12px;
+  color: #e5e7eb;
+}
+
+.metric-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #9ca3af;
+}
+
+.metric-value {
+  margin-top: 4px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.metric-trend {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.metric-trend mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.metric-trend.neutral {
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.metric-trend.positive {
+  background: #022c22;
+  color: #6ee7b7;
+}
+
+.metric-trend.negative {
+  background: #450a0a;
+  color: #fecaca;
+}
+
+.metric-trend.highlight {
+  background: #111827;
+  color: #c7d2fe;
+}
+
+/* ===========================
+   USERS FILTER BAR
+   Pure HTML/CSS – no mat-card
+=========================== */
+
+.users-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #020b24;
+  border: 1px solid #1e293b;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.7);
+  margin-bottom: 12px;
+  flex-wrap: wrap; /* so it behaves on smaller screens */
+}
+
+/* INDIVIDUAL FIELDS */
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 170px;
+}
+
+.filter-field--grow {
+  flex: 1 1 auto; /* search takes remaining width */
+}
+
+.filter-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+}
+
+/* INPUT / SELECT WRAPPER */
+
+.filter-control {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #020617;
+  border: 1px solid #334155;
+}
+
+/* TEXT INPUT */
+
+.filter-control input {
+  flex: 1 1 auto;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #f9fafb;
+  font-size: 13px;
+}
+
+.filter-control input::placeholder {
+  color: #9ca3af;
+}
+
+/* SELECT */
+
+.filter-control select {
+  flex: 1 1 auto;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #f9fafb;          /* bright text when closed */
+  font-size: 13px;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+/* dropdown options (the open panel) */
+.filter-control select option {
+  background-color: #020617;  /* dark panel */
+  color: #f9fafb;             /* bright text */
+  
+}
+
+/* make the default "All" text a bit more visible */
+.filter-control select option[value=""] {
+  color: #e5e7eb;
+}
+
+/* tiny dropdown arrow */
+.filter-control select::-ms-expand {
+  display: none;
+}
+
+/* ACTION BUTTONS */
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px; 
+}
+
+.filter-btn {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+/* Primary button */
+
+.filter-btn--primary {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #f9fafb;
+}
+
+.filter-btn--primary:hover {
+  background: #6366f1;
+  border-color: #6366f1;
+  transform: translateY(-1px);
+}
+
+.filter-btn--primary:active {
+  transform: translateY(0);
+}
+
+/* Ghost button */
+
+.filter-btn--ghost {
+  background: transparent;
+  border-color: #475569;
+  color: #e5e7eb;
+}
+
+.filter-btn--ghost:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+/* ===========================
+   RESPONSIVE BEHAVIOUR
+=========================== */
+
+@media (max-width: 900px) {
+  .users-filters {
+    align-items: stretch;
+  }
+
+  .filter-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+
+
+/* =========== TABLE CARD =========== */
+
+.table-card {
+  padding: 10px 0 4px;
+  border-radius: 10px;
+  background: #020617;
+  border: 1px solid #111827;
+  color: #e5e7eb;
+}
+
+.table-toolbar {
+  padding: 0 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolbar-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar-title {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.toolbar-subtitle {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* =========== TABLE LOOK =========== */
+
+.table-container {
+  overflow-x: auto;
+  padding: 0 4px;
+}
+
+/* darken material table */
+.table-card .mat-mdc-table,
+.table-card .mat-mdc-row,
+.table-card .mat-mdc-header-row,
+.table-card .mat-mdc-cell,
+.table-card .mat-mdc-header-cell {
+  background-color: transparent !important;
+  color: #e5e7eb !important;
+}
+
+/* striping */
+.users-table tr:nth-child(even) td {
+  background-color: #050a19 !important;
+}
+.users-table tr:nth-child(odd) td {
+  background-color: #020617 !important;
+}
+
+/* header */
+.users-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af !important;
+  border-bottom: 1px solid #1f2937;
+}
+
+/* cells */
+.users-table td {
+  font-size: 13px;
+  border-bottom: 1px solid #020617;
+}
+
+.users-table th,
+.users-table td {
+  padding: 10px 14px;
+}
+
+/* hover */
+tr.mat-mdc-row:hover {
+  background-color: #111827 !important;
+}
+
+/* =========== USER CELL =========== */
+
+.user-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f1f5f9;
+  font-weight: 600;
+}
+
+.user-name {
+  color: #e2e8f0;
+}
+
+.user-id {
+  color: #94a3b8;
+}
+
+/* email readability */
+.email-text {
+  color: #e5e7eb !important;
+}
+
+/* KYC pill */
+
+.kyc-pill {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  text-transform: uppercase;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.kyc-approved {
+  border-color: #16a34a;
+  color: #bbf7d0;
+}
+
+.kyc-pending {
+  border-color: #eab308;
+  color: #fef9c3;
+}
+
+.kyc-rejected {
+  border-color: #ef4444;
+  color: #fee2e2;
+}
+
+/* role/status pills */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.pill-role {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+}
+
+.pill-admin {
+  border-color: #4f46e5;
+}
+
+.pill-user {
+  border-color: #334155;
+}
+
+.pill-status {
+  background: #0f172a;
+  border: 1px solid #334155;
+}
+
+.pill-active {
+  border-color: #16a34a;
+  color: #bbf7d0;
+}
+
+.pill-banned {
+  border-color: #ef4444;
+  color: #fecaca;
+}
+
+/* ACTION BUTTONS */
+
+.actions-group {
+  display: flex;
+  gap: 6px;
+}
+
+.small-btn {
+  font-size: 11px;
+  padding: 2px 10px;
+}
+
+/* EMPTY STATE */
+
+.empty-state {
+  padding: 40px 16px 32px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.empty-state h3 {
+  margin: 4px 0;
+  font-size: 16px;
+  color: #e5e7eb;
+}
+
+.empty-state mat-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+/* PAGINATOR */
+
+mat-paginator {
+  border-top: 1px solid #111827;
+  background-color: #1f2937;
+  
+}
+
+/* LOCAL paginator styling for Admin Users */
+:host ::ng-deep .mat-mdc-paginator {
+  color: #f9fafb !important;
+}
+
+:host ::ng-deep .mat-mdc-paginator-range-label {
+  color: #f9fafb !important;
+}
+
+:host ::ng-deep .mat-mdc-select-value-text {
+  color: #f9fafb !important;
+}
+
+:host ::ng-deep .mat-mdc-select-arrow svg {
+  fill: #f9fafb !important;
+}
+
+:host ::ng-deep .mat-mdc-icon-button {
+  color: #f9fafb !important;
+}
+
+
+
+:host ::ng-deep .mat-mdc-paginator .mat-mdc-icon-button {
+  color: #9ca3af!important;
+}
+
+:host ::ng-deep .mat-mdc-form-field .mat-mdc-paginator-page-size-select {
+  color: #9ca3af!important;
+}
+
+
+:host ::ng-deep .mat-mdc-paginator .mat-mdc-icon-button mat-icon {
+  color: #9ca3af!important;
+  fill: #9ca3af !important;
+}
+
+:host ::ng-deep .mat-mdc-paginator .mat-mdc-icon-button svg {
+  fill: #9ca3af !important;
+  stroke: #9ca3af !important;
+}
+
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+  .metrics-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .filters-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-right {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

@@ -1,0 +1,74 @@
+<div class="admin-root">
+  <!-- LEFT SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <div class="brand-icon">
+        <span class="brand-initial">R</span>
+      </div>
+      <div class="brand-text">
+        <div class="brand-title">Rent-Wyse</div>
+        <div class="brand-subtitle">Admin Panel</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button
+        class="nav-item"
+        routerLink="/admin"
+        routerLinkActive="nav-item-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <mat-icon>dashboard</mat-icon>
+        <span>Dashboard</span>
+      </button>
+
+      <button
+        class="nav-item"
+        routerLink="/admin/users"
+        routerLinkActive="nav-item-active"
+      >
+        <mat-icon>people</mat-icon>
+        <span>Users</span>
+      </button>
+
+      <!-- You’ll add posts / conversations / kyc / settings later -->
+      <!--
+      <button class="nav-item" routerLink="/admin/posts" routerLinkActive="nav-item-active">
+        <mat-icon>home_work</mat-icon>
+        <span>Listings</span>
+      </button>
+      -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="secondary-btn" (click)="goToMainSite()">
+        <mat-icon>open_in_new</mat-icon>
+        <span>Main Site</span>
+      </button>
+      <button class="ghost-btn" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="admin-main">
+    <!-- TOP BAR -->
+    <header class="admin-topbar">
+      <div class="topbar-left">
+        <h1>Admin</h1>
+        <span class="topbar-subtitle">Control center for Rent-Wyse.</span>
+      </div>
+
+      <div class="topbar-right">
+        <div class="topbar-badge">Admin Mode</div>
+      </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

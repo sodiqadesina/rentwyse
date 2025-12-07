@@ -72,12 +72,14 @@
 
 /* nav area scrolls, footer stays fixed at bottom */
 .sidebar-nav {
-  margin-top: 10px;
-  flex: 1 1 auto;
+  margin-top: 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  overflow-y: auto;
+  flex: 1 1 auto;        
+  min-height: 0;          
+  overflow-y: auto;       
+  padding-right: 4px;     
 }
 
 /* nav item buttons */
@@ -116,12 +118,15 @@
 
 /* footer always visible */
 .sidebar-footer {
-  margin-top: 10px;
+  flex-shrink: 0;
+  margin-top: auto;      
   padding-top: 10px;
+  padding-bottom: 8px;
   border-top: 1px solid #111827;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  background: #020617;    /* solid bg so it’s readable over nav scroll */
 }
 
 .secondary-btn,

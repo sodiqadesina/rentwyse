@@ -130,7 +130,7 @@ exports.listPost = (req, res, next) => {
   // Soft delete – always exclude deleted posts
   filterQuery.isDeleted = { $ne: true }; // only fetch posts that are not soft-deleted
 
-  filterQuery.status = { $ne: ["deleted","flagged"]} // exculude flagged posts 
+  filterQuery.status = { $ne: "flagged"} // exculude flagged posts 
 
   if (req.query.city) {
     filterQuery.city = { $regex: new RegExp(req.query.city, "i") };

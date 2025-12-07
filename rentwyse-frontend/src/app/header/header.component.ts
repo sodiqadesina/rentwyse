@@ -62,12 +62,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private loadUserRole(): void {
     this.authService.getUserDetails().subscribe({
       next: (res) => {
-        // NOTE: backend returns { user: { ... } }
-        this.isAdmin = res?.user?.role === 'admin';
-        console.log('[Header] isAdmin?', this.isAdmin, 'role:', res?.user?.role);
+        // res can be null if no userId
+        const user = res?.user || res;
+
+        if (!user) {
+          this.isAdmin = false;
+          return;
+        }
+
+        this.isAdmin = user.role === 'admin';
       },
       error: (err) => {
-        console.error('[Header] Failed to load user details for role check', err);
+        console.error('Failed to load user details for header:', err);
         this.isAdmin = false;
       }
     });

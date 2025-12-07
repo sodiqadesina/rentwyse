@@ -153,10 +153,9 @@ export class AuthService {
 
             this.setAuthTimer(expireDuration);
             this.isAuthenticated = true;
-            this.authStatusListener.next(true);
             this.userId = response.userId;
             this.role = response.role; // IMPORTANT: store role
-
+            this.authStatusListener.next(true);
             console.log("user id from server = " + response.userId);
             const now = new Date();
             const expirationDate = new Date(

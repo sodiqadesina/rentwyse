@@ -28,6 +28,18 @@
             <li *ngIf="!userIsAuth">
                 <a mat-button routerLink="/auth/signup" routerLinkActive="active-link">Signup</a>
             </li>
+            <!-- ADMIN ONLY BUTTON -->
+            <li *ngIf="userIsAuth && isAdmin">
+            <a 
+                mat-button
+                routerLink="/admin"
+                routerLinkActive="active-link"
+                class="admin-nav-btn"
+            >
+                Admin-Portal
+            </a>
+            </li>
+
             <li *ngIf="userIsAuth">
                 <button mat-button  (click)="onLogout()" routerLinkActive="active-link">Signout</button>
             </li>

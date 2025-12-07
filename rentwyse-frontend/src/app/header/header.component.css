@@ -51,6 +51,24 @@ mat-toolbar {
   font-weight: 500;
 }
 
+/* ADMIN BUTTON STYLE */
+.admin-nav-btn {
+  background: #0f172a !important;      /* deep navy */
+  color: #38bdf8 !important;           /* sky-blue text */
+  border: 1px solid #1e293b !important;
+  border-radius: 6px;
+  padding: 6px 14px !important;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.admin-nav-btn:hover {
+  background: #1e293b !important;
+  color: #7dd3fc !important;
+  border-color: #38bdf8 !important;
+}
+
+
 /* Mobile menu icon (hamburger) */
 .menu-icon {
   display: none;                 /* hidden on desktop */

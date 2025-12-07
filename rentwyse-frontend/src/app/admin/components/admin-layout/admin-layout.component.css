@@ -228,7 +228,7 @@
 =========================== */
 
 /* Desktop / large: sidebar fixed on the left */
-@media (min-width: 1025px) {
+@media (min-width: 1290px) {
   .admin-sidebar {
     position: sticky;
     top: 0;
@@ -236,7 +236,7 @@
 }
 
 /* Tablet & below: sidebar becomes off-canvas */
-@media (max-width: 1024px) {
+@media (max-width: 1300px) {
   .admin-root {
     /* so overlay can sit above main */
     position: relative;

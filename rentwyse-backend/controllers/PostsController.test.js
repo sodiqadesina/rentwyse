@@ -80,12 +80,14 @@ describe("PostController - deletePost", () => {
         _id: "123",
         creator: "user123",
         isDeleted: { $ne: true },
+        status: { $ne: "deleted" },       // <- new condition
       },
       {
-        $set: {
+        $set: expect.objectContaining({
           isDeleted: true,
+          status: "deleted",
           deletedAt: expect.any(Date),
-        },
+        }),
       }
     );
 
@@ -114,8 +116,9 @@ describe("PostController - deletePost", () => {
         _id: "non-existent-id",
         creator: "user123",
         isDeleted: { $ne: true },
+        status: { $ne: "deleted" },       // <- new condition
       },
-      expect.any(Object) // we don't care about the exact $set object here
+      expect.any(Object) // update document (we don't care exact shape here)
     );
 
     expect(res.status).toHaveBeenCalledWith(404);

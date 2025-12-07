@@ -371,6 +371,7 @@ exports.editPost = (req, res, next) => {
     });
 };
 
+
 /**
  * DELETE (soft delete)
  * ---------------------------------------------------------------------------
@@ -387,36 +388,47 @@ exports.deletePost = (req, res, next) => {
   logger.info("Soft deleting post", {
     postIdParam: req.params._id,
     userId: req.userData && req.userData.userId,
+    status: req.userData.status
   });
 
   // Soft delete – mark as deleted instead of removing from DB
   Post.updateOne(
-    { _id: req.params._id, creator: req.userData.userId, isDeleted: { $ne: true } }, // only active posts
-    { $set: { isDeleted: true, deletedAt: new Date() } } // mark as deleted
-  )
-    .then((result) => {
-      logger.info("Delete operation result", { result });
+  {
+    _id: req.params._id,
+    creator: req.userData.userId,
+    isDeleted: { $ne: true },
+    status: { $ne: "deleted" },   // only non-deleted posts
+  },
+  {
+    $set: {
+      isDeleted: true,
+      status: "deleted",
+      deletedAt: new Date(),
+    },
+  }
+)
+  .then((result) => {
+    logger.info("Delete operation result", { result });
 
-      // Handle both Mongoose 5 and 6 shapes
-      const modified =
-        result.modifiedCount > 0 ||
-        result.nModified > 0; // fallback for older versions
+    const modified =
+      result.modifiedCount > 0 || result.nModified > 0;
 
-      if (modified) {
-        res.status(200).json({ message: "Delete Successful!" }); // keep same response text
-      } else {
-        res
-          .status(404)
-          .json({ message: "Post not found or user not authorized to delete" });
-      }
-    })
-    .catch((error) => {
-      logger.error("Error during the Delete operation in deletePost", {
-        error,
+    if (modified) {
+      return res.status(200).json({ message: "Delete Successful!" });
+    } else {
+      return res.status(404).json({
+        message: "Post not found or user not authorized to delete",
       });
-      res.status(500).json({ message: "Delete Failed!" });
+    }
+  })
+  .catch((error) => {
+    logger.error("Error during the Delete operation in deletePost", {
+      error,
     });
+    res.status(500).json({ message: "Delete Failed!" });
+  });
 };
+
 
 /**
  * SEARCH

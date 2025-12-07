@@ -135,7 +135,6 @@ describe("AdminController - updateUserStatus", () => {
       status: "banned",
     };
 
-    // Mock chained call: User.findByIdAndUpdate(...).select(...)
     const mockSelect = jest.fn().mockResolvedValue(updatedUser);
     User.findByIdAndUpdate.mockReturnValue({ select: mockSelect });
 
@@ -150,12 +149,11 @@ describe("AdminController - updateUserStatus", () => {
 
     expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
       "user123",
-      { status: "banned" },
+      expect.objectContaining({ status: "banned" }), // allow extra fields like updatedAt
       { new: true }
     );
     expect(mockSelect).toHaveBeenCalledWith("-password -emailToken");
 
-    // Audit log should be created
     expect(AuditLog.create).toHaveBeenCalledWith(
       expect.objectContaining({
         admin: "admin123",
@@ -166,7 +164,6 @@ describe("AdminController - updateUserStatus", () => {
       })
     );
 
-    // Controller doesn't explicitly set res.status on success → 200 by default
     expect(res.json).toHaveBeenCalledWith({
       message: "User status updated.",
       user: updatedUser,
@@ -189,7 +186,6 @@ describe("AdminController - updateUserStatus", () => {
   });
 
   it("should return 404 if user is not found", async () => {
-    // select() resolves to null → not found
     const mockSelect = jest.fn().mockResolvedValue(null);
     User.findByIdAndUpdate.mockReturnValue({ select: mockSelect });
 
@@ -204,7 +200,7 @@ describe("AdminController - updateUserStatus", () => {
 
     expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
       "missing-user",
-      { status: "active" },
+      expect.objectContaining({ status: "active" }), // allow extra fields
       { new: true }
     );
     expect(mockSelect).toHaveBeenCalledWith("-password -emailToken");

@@ -381,6 +381,19 @@ exports.getPosts = async (req, res) => {
  * Body:
  *  - status: "draft" | "active" | "flagged" | "deleted"
  */
+
+function syncDeletionState(post) {
+  if (post.isDeleted || post.status === "deleted") {
+    post.isDeleted = true;
+    post.status = "deleted";
+  } else {
+    post.isDeleted = false;
+    if (post.status === "deleted") {
+      post.status = "active"; // or draft if needed
+    }
+  }
+}
+
 exports.updatePostStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -392,13 +405,22 @@ exports.updatePostStatus = async (req, res) => {
       status,
     });
 
-    if (!["draft", "active", "flagged", "deleted"].includes(status)) {
+    const validStatuses = ["draft", "active", "flagged", "deleted"];
+    if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid post status." });
     }
 
+    const now = new Date();
+    const isDeleted = status === "deleted";
+
     const post = await Post.findByIdAndUpdate(
       id,
-      { status, updatedAt: new Date() },
+      {
+        status,
+        isDeleted,
+        deletedAt: isDeleted ? now : null,
+        updatedAt: now,
+      },
       { new: true }
     );
 
@@ -409,14 +431,16 @@ exports.updatePostStatus = async (req, res) => {
 
     await logAudit(req.user._id, "UPDATE_POST_STATUS", "post", post._id, {
       status,
+      isDeleted,
     });
 
-    res.json({ message: "Post status updated.", post });
+    return res.status(200).json({ message: "Post status updated.", post });
   } catch (err) {
     logger.error("updatePostStatus error:", err);
-    res.status(500).json({ message: "Failed to update post status." });
+    return res.status(500).json({ message: "Failed to update post status." });
   }
 };
+
 
 /**
  * PATCH /api/admin/posts/:id/featured

@@ -219,8 +219,6 @@ exports.listPostByUserId = (req, res, next) => {
     return res.status(400).json({ message: "Invalid user ID" });
   }
 
-  // Soft delete – filter by creator AND not deleted
-  const filter = { creator: userId, isDeleted: { $ne: true } };
 
   const postQuery = Post.find(filter); // Filtering the posts by user ID
   let fetchedPosts;

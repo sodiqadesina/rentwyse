@@ -1,12 +1,241 @@
-<mat-card>
-  <mat-card-title>Admin Dashboard</mat-card-title>
-  <mat-card-subtitle>
-    High-level overview of platform activity.
-  </mat-card-subtitle>
-  <mat-card-content>
-    <p>
-      Later you’ll hook this to /admin/analytics (users-per-month,
-      posts-per-city, conversation funnel).
-    </p>
-  </mat-card-content>
-</mat-card>
+<div class="dashboard-page">
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <div>
+      <h2>Overview</h2>
+      <p class="subtitle">
+        High-level snapshot of platform health, users, and listings.
+      </p>
+    </div>
+
+    <button
+      class="icon-link"
+      type="button"
+      (click)="refresh()"
+      [disabled]="isLoading"
+    >
+      <mat-icon fontIcon="refresh"></mat-icon>
+      <span *ngIf="!isLoading">Refresh</span>
+      <span *ngIf="isLoading">Loading…</span>
+    </button>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div class="error-banner" *ngIf="errorMessage">
+    <mat-icon fontIcon="error_outline"></mat-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- METRICS GRID -->
+  <section class="metrics-section">
+    <div class="metrics-row">
+      <!-- Total Users -->
+      <div class="metric-card">
+        <div class="metric-label">Total Users</div>
+        <div class="metric-value">{{ totalUsers }}</div>
+        <div class="metric-sub">
+          <span class="badge badge-soft">
+            Admins: {{ adminCount }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Active Users -->
+      <div class="metric-card">
+        <div class="metric-label">Active Users</div>
+        <div class="metric-value">{{ activeUsers }}</div>
+        <div class="metric-sub">
+          <span class="badge badge-success">
+            {{ activeUserPercent }}% of all users
+          </span>
+        </div>
+      </div>
+
+      <!-- Banned Users -->
+      <div class="metric-card">
+        <div class="metric-label">Banned Users</div>
+        <div class="metric-value">{{ bannedUsers }}</div>
+        <div class="metric-sub">
+          <span class="badge badge-danger">
+            {{ bannedUserPercent }}% of all users
+          </span>
+        </div>
+      </div>
+
+      <!-- Admin Ratio -->
+      <div class="metric-card">
+        <div class="metric-label">Admin Coverage</div>
+        <div class="metric-value">{{ adminRatioPercent }}%</div>
+        <div class="metric-sub">
+          <span class="badge badge-soft">
+            {{ adminCount }} admins · {{ totalUsers }} users
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="metrics-row">
+      <!-- Total Listings -->
+      <div class="metric-card">
+        <div class="metric-label">Total Listings</div>
+        <div class="metric-value">{{ totalPosts }}</div>
+        <div class="metric-sub">
+          <span class="badge badge-soft">
+            Featured: {{ featuredPosts }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Active Listings -->
+      <div class="metric-card">
+        <div class="metric-label">Active Listings</div>
+        <div class="metric-value">{{ activePosts }}</div>
+        <div class="metric-sub">
+          <span class="badge badge-success">
+            {{ activePostPercent }}% active
+          </span>
+        </div>
+      </div>
+
+      <!-- Flagged Listings -->
+      <div class="metric-card">
+        <div class="metric-label">Flagged Listings</div>
+        <div class="metric-value">{{ flaggedPosts }}</div>
+        <div class="metric-sub">
+          <span class="badge badge-warning">
+            {{ flaggedPostPercent }}% flagged
+          </span>
+        </div>
+      </div>
+
+      <!-- Featured Ratio -->
+      <div class="metric-card">
+        <div class="metric-label">Featured Ratio</div>
+        <div class="metric-value">
+          {{ featuredPostPercent }}%
+        </div>
+        <div class="metric-sub">
+          <span class="badge badge-soft">
+            {{ featuredPosts }} featured of {{ totalPosts }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- “GRAPH” SECTION (data-driven mini visualizations, no extra libs) -->
+  <section class="charts-section">
+    <div class="chart-grid">
+      <!-- USERS HEALTH -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3>Users Health</h3>
+            <p>Active vs banned distribution across the platform.</p>
+          </div>
+        </div>
+
+        <div class="chart-body">
+          <!-- Stacked bar: active vs banned -->
+          <div class="stacked-bar" *ngIf="totalUsers > 0; else noUserData">
+            <div
+              class="stacked-bar__segment stacked-bar__segment--success"
+              [style.width.%]="activeUserPercent || 2"
+            >
+              <span *ngIf="activeUserPercent >= 10">
+                {{ activeUserPercent }}% Active
+              </span>
+            </div>
+            <div
+              class="stacked-bar__segment stacked-bar__segment--danger"
+              [style.width.%]="bannedUserPercent || 0"
+              *ngIf="bannedUsers > 0"
+            >
+              <span *ngIf="bannedUserPercent >= 10">
+                {{ bannedUserPercent }}% Banned
+              </span>
+            </div>
+          </div>
+
+          <ng-template #noUserData>
+            <div class="chart-placeholder">
+              Not enough data to compute user distribution yet.
+            </div>
+          </ng-template>
+
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-dot legend-dot--success"></span>
+              <span>Active ({{ activeUsers }})</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot legend-dot--danger"></span>
+              <span>Banned ({{ bannedUsers }})</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot legend-dot--soft"></span>
+              <span>Admins ({{ adminCount }})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LISTINGS STATUS BREAKDOWN -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3>Listings Status Breakdown</h3>
+            <p>Quick sense of moderation load and inventory health.</p>
+          </div>
+        </div>
+
+        <div class="chart-body">
+          <div class="bar-chart" *ngIf="totalPosts > 0; else noPostData">
+            <div class="bar-chart__item">
+              <div
+                class="bar-chart__bar bar-chart__bar--success"
+                [style.height.%]="activePostPercent || 2"
+              ></div>
+              <span class="bar-chart__label">Active</span>
+              <span class="bar-chart__value">{{ activePosts }}</span>
+            </div>
+
+            <div class="bar-chart__item">
+              <div
+                class="bar-chart__bar bar-chart__bar--warning"
+                [style.height.%]="flaggedPostPercent || 2"
+              ></div>
+              <span class="bar-chart__label">Flagged</span>
+              <span class="bar-chart__value">{{ flaggedPosts }}</span>
+            </div>
+
+            <div class="bar-chart__item">
+              <div
+                class="bar-chart__bar bar-chart__bar--muted"
+                [style.height.%]="featuredPostPercent || 2"
+              ></div>
+              <span class="bar-chart__label">Featured</span>
+              <span class="bar-chart__value">{{ featuredPosts }}</span>
+            </div>
+          </div>
+
+          <ng-template #noPostData>
+            <div class="chart-placeholder">
+              Not enough listings to visualize yet.
+            </div>
+          </ng-template>
+
+          <div class="chart-footnote">
+            Percentages are computed from the current dataset fetched from the
+            admin API.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GLOBAL LOADER OVERLAY (optional) -->
+  <div class="page-loading-overlay" *ngIf="isLoading">
+    <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+  </div>
+</div>

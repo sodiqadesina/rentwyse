@@ -382,17 +382,7 @@ exports.getPosts = async (req, res) => {
  *  - status: "draft" | "active" | "flagged" | "deleted"
  */
 
-function syncDeletionState(post) {
-  if (post.isDeleted || post.status === "deleted") {
-    post.isDeleted = true;
-    post.status = "deleted";
-  } else {
-    post.isDeleted = false;
-    if (post.status === "deleted") {
-      post.status = "active"; // or draft if needed
-    }
-  }
-}
+
 
 exports.updatePostStatus = async (req, res) => {
   try {

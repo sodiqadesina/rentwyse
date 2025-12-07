@@ -219,18 +219,22 @@ exports.listPostByUserId = (req, res, next) => {
     return res.status(400).json({ message: "Invalid user ID" });
   }
 
+  // Filter: all posts for this user (including deleted/flagged)
+  
+  const filter = { creator: userId };
 
-  const postQuery = Post.find(filter); // Filtering the posts by user ID
+  let postQuery = Post.find(filter).sort({ dateListed: -1 });
   let fetchedPosts;
 
   if (pageSize && currentPage) {
-    postQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+    postQuery = postQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
   }
 
   postQuery
     .then((documents) => {
       fetchedPosts = documents;
-      return Post.countDocuments(filter); // Count only posts by this user (non-deleted)
+      // Count only posts for this user with the same filter
+      return Post.countDocuments(filter);
     })
     .then((count) => {
       logger.info("Posts by user fetched successfully", {

@@ -10,7 +10,7 @@ import { AdminGuard } from "./auth/admin-guard";
 
 const routes: Routes = [
   { path: "", component: HomeComponent },
-  { path: "list", component: PostListComponent, canActivate: [AuthGuard] },
+  { path: "list", component: PostListComponent,},
   {
     path: "create",
     component: PostCreateComponent,

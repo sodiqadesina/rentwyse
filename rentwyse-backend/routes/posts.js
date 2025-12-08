@@ -9,7 +9,7 @@ const extractFile = require("../middleware/file");
 router.post("", checkAuth, extractFile, PostController.newPost);
 
 //fetching all Posts
-router.get("", checkAuth, PostController.listPost);
+router.get("", PostController.listPost);
 
 // example
 // http://localhost:3000/api/search-posts?city=Waterloo

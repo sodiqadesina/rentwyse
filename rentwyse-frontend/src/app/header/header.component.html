@@ -19,9 +19,9 @@
                 <li *ngIf="userIsAuth">
                     <a mat-button routerLink="/my-listing" routerLinkActive="active-link">My Rentals</a>
                 </li>
-                <li *ngIf="userIsAuth">
-                    <a mat-button routerLink="/list" routerLinkActive="active-link">Rentals</a>
-                </li>
+             <li >
+                <a mat-button routerLink="/list" routerLinkActive="active-link">Rentals</a>
+            </li>    
             <li *ngIf="!userIsAuth">
                 <a mat-button routerLink="/auth/login" routerLinkActive="active-link">Login</a>
             </li>

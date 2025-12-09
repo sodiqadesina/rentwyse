@@ -1,0 +1,18 @@
+<div class="map-shell">
+  <google-map
+    height="100%"
+    width="100%"
+    [center]="center"
+    [zoom]="zoom"
+    [options]="options"
+  >
+    <map-marker
+      *ngFor="let marker of markers"
+      [position]="marker.position"
+      [label]="marker.label || ''"
+      [options]="marker.options || {}"
+      (mapClick)="onMarkerClicked(marker)"
+    >
+    </map-marker>
+  </google-map>
+</div>

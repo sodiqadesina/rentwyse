@@ -56,6 +56,9 @@ export class PostsService {
                             status: post.status,
                             isDeleted: post.isDeleted,
                             featured: post.featured, 
+                            lat: post.lat,
+                            lng: post.lng,
+                            location: post.location,
                         };
                     }),
                     maxPost: postData.maxPost

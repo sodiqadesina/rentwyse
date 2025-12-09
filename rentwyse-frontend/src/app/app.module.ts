@@ -18,6 +18,7 @@ import { MessagingModule } from './messaging/messaging.module';
 import { NotificationComponent } from './notification/notification.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatBadgeModule } from '@angular/material/badge';
+import { GoogleMapsModule } from '@angular/google-maps';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { MatBadgeModule } from '@angular/material/badge';
     MessagingModule,
     MatSnackBarModule,
     MatBadgeModule,
+    GoogleMapsModule,
   ],
   providers: [{provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true}

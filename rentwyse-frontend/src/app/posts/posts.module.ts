@@ -13,13 +13,15 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import {UserPostListComponent} from './user-post-list/user-post-list.component'
 import { FormsModule } from '@angular/forms';
-
+import { GoogleMapsModule } from '@angular/google-maps';
+import { PostsMapComponent } from './posts-map/posts-map.component';
 
 @NgModule({
     declarations: [
         PostCreateComponent,
         PostListComponent,
         UserPostListComponent,
+        PostsMapComponent,
     ],
     imports: [
         CommonModule,
@@ -33,6 +35,7 @@ import { FormsModule } from '@angular/forms';
         MatCheckboxModule,
         DragDropModule,
         FormsModule,
+        GoogleMapsModule
     ]
 })
 

@@ -21,5 +21,12 @@ export interface post {
    featured?: boolean;
    status?: 'draft' | 'active' | 'flagged' | 'deleted';
    isDeleted?: boolean;
+   /**  GEO FIELDS (new) */
+   lat?: number;
+   lng?: number;
+   location?: {
+    type: 'Point';
+    coordinates: [number, number]; // [lng, lat]
+   };
  }
  

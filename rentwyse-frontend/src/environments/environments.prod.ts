@@ -2,7 +2,7 @@ export const environment = {
     production: true,
     // other settings
     apiUrl: "https://rentwyse.onrender.com/api",
-    googleMapsApiKey: "YOUR_DEV_KEY",
+    googleMapsApiKey: "AIzaSyC6UjWq-RqMcBLBpLGcZGqCujTwu-wQc84",
     paypalClientId: "YOUR_DEV_PAYPAL_ID"
   };
   

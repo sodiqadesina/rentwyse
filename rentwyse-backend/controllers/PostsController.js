@@ -1,6 +1,6 @@
 const Post = require("../models/post");
 const mongoose = require("mongoose");
-
+const axios = require("axios");
 /**
  * Lightweight logger wrapper for this controller.
  * Replace with Winston/pino later if needed.
@@ -10,6 +10,62 @@ const logger = {
   error: (...args) => console.error("[ERROR] [PostController]", ...args),
 };
 
+
+
+// Reusable helper to geocode an address-like object
+async function geocodeAddressForPost(postLike) {
+  const addressParts = [
+    postLike.address,
+    postLike.city,
+    postLike.province,
+    postLike.zipcode,
+    postLike.country,
+  ].filter(Boolean);
+
+  const fullAddress = addressParts.join(", ");
+
+  if (!fullAddress) {
+    return postLike; // nothing to geocode
+  }
+
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    console.warn("[Geocode] GOOGLE_MAPS_API_KEY not set");
+    return postLike;
+  }
+
+  try {
+    const url = "https://maps.googleapis.com/maps/api/geocode/json";
+    const resp = await axios.get(url, {
+      params: {
+        address: fullAddress,
+        key: apiKey,
+      },
+    });
+
+    const result = resp.data.results?.[0];
+    if (!result) {
+      console.warn("[Geocode] no results for:", fullAddress);
+      return postLike;
+    }
+
+    const { lat, lng } = result.geometry.location;
+
+    postLike.lat = lat;
+    postLike.lng = lng;
+    postLike.location = {
+      type: "Point",
+      coordinates: [lng, lat], // GeoJSON: [lng, lat]
+    };
+
+    return postLike;
+  } catch (err) {
+    console.error("[Geocode] error:", err.message || err);
+    return postLike; // don’t block post creation/update
+  }
+}
+
+
 /**
  * CREATE
  * ---------------------------------------------------------------------------
@@ -18,90 +74,100 @@ const logger = {
  * Create a new rental post with one or more uploaded images.
  * Multer middleware is expected to populate `req.files`.
  */
+exports.newPost = async (req, res, next) => {
+  try {
+    // Ensure user is authenticated & has a userId
+    if (!req.userData || !req.userData.userId) {
+      logger.error("newPost called without valid userId", {
+        userData: req.userData,
+      });
+      return res.status(401).json({ message: "User not authenticated." });
+    }
 
-exports.newPost = (req, res, next) => {
-  // Ensure user is authenticated & has a userId
-  if (!req.userData || !req.userData.userId) {
-    logger.error("newPost called without valid userId", {
-      userData: req.userData,
+    const url = req.protocol + "://" + req.get("host");
+
+    const images = (req.files || []).map(
+      (file) => url + "/images/" + file.filename
+    );
+
+    logger.info("Creating new post", {
+      userId: req.userData.userId,
+      imageCount: images.length,
     });
-    return res.status(401).json({ message: "User not authenticated." });
+
+    let post = new Post({
+      title: req.body.title,
+      description: req.body.description,
+      imagePath: images, // storing all images in an array
+      creator: req.userData.userId,
+      bedroom: req.body.bedroom,
+      bathroom: req.body.bathroom,
+      furnished: req.body.furnished,
+      typeOfProperty: req.body.typeOfProperty,
+      parkingAvailable: req.body.parkingAvailable,
+      rentType: req.body.rentType,
+      city: req.body.city,
+      address: req.body.address,
+      province: req.body.province,
+      zipcode: req.body.zipcode,
+      country: req.body.country,
+      price: req.body.price,
+      dateListed: req.body.dateListed,
+      dateAvailableForRent: req.body.dateAvailableForRent,
+      // optional defaults
+      status: "active",
+      isDeleted: false,
+    });
+
+    logger.info("newPost payload", { body: req.body });
+    logger.info("newPost document", { post });
+
+    //  Try to geocode 
+    post = await geocodeAddressForPost(post);
+
+    //  Actually save the post
+    const result = await post.save();
+
+    logger.info("Post created successfully", {
+      postId: result._id,
+      userId: req.userData.userId,
+    });
+
+    return res.status(201).json({
+      post: {
+        _id: result._id,
+        title: result.title,
+        description: result.description,
+        imagePath: result.imagePath,
+        creator: req.userData.userId,
+        bedroom: result.bedroom,
+        bathroom: result.bathroom,
+        furnished: result.furnished,
+        typeOfProperty: result.typeOfProperty,
+        parkingAvailable: result.parkingAvailable,
+        rentType: result.rentType,
+        city: result.city,
+        address: result.address,
+        province: result.province,
+        zipcode: result.zipcode,
+        country: result.country,
+        price: result.price,
+        dateListed: result.dateListed,
+        dateAvailableForRent: result.dateAvailableForRent,
+        lat: result.lat,
+        lng: result.lng,
+        location: result.location,
+        status: result.status,
+        isDeleted: result.isDeleted,
+      },
+      message: "Post added successfully",
+    });
+  } catch (error) {
+    logger.error("Creating post failed", { error });
+    return res.status(500).json({ message: "Creating Post failed" });
   }
-
-  const url = req.protocol + "://" + req.get("host");
-
-  const images = (req.files || []).map(
-    (file) => url + "/images/" + file.filename
-  );
-
-  logger.info("Creating new post", {
-    userId: req.userData.userId,
-    imageCount: images.length,
-  });
-
-  const post = new Post({
-    title: req.body.title,
-    description: req.body.description,
-    imagePath: images, // storing all images in an array
-    creator: req.userData.userId,
-    bedroom: req.body.bedroom,
-    bathroom: req.body.bathroom,
-    furnished: req.body.furnished,
-    typeOfProperty: req.body.typeOfProperty,
-    parkingAvailable: req.body.parkingAvailable,
-    rentType: req.body.rentType,
-    city: req.body.city,
-    address: req.body.address,
-    province: req.body.province,
-    zipcode: req.body.zipcode,
-    country: req.body.country,
-    price: req.body.price,
-    dateListed: req.body.dateListed,
-    dateAvailableForRent: req.body.dateAvailableForRent,
-  });
-
-  logger.info("newPost payload", { body: req.body });
-  logger.info("newPost document", { post });
-
-  post
-    .save()
-    .then((result) => {
-      logger.info("Post created successfully", {
-        postId: result._id,
-        userId: req.userData.userId,
-      });
-
-      res.status(201).json({
-        post: {
-          _id: result._id,
-          title: result.title,
-          description: result.description,
-          // 🔧 your schema field is imagePath, not imagePaths
-          imagePath: result.imagePath,
-          creator: req.userData.userId,
-          bedroom: result.bedroom,
-          bathroom: result.bathroom,
-          furnished: result.furnished,
-          typeOfProperty: result.typeOfProperty,
-          parkingAvailable: result.parkingAvailable,
-          rentType: result.rentType,
-          city: result.city,
-          address: result.address,
-          province: result.province,
-          zipcode: result.zipcode,
-          country: result.country,
-          price: result.price,
-          dateListed: result.dateListed,
-          dateAvailableForRent: result.dateAvailableForRent,
-        },
-        message: "Post added successfully",
-      });
-    })
-    .catch((error) => {
-      logger.error("Creating post failed", { error });
-      res.status(500).json({ message: "Creating Post failed" });
-    });
 };
+
 
 
 /**
@@ -319,6 +385,7 @@ exports.editPost = (req, res, next) => {
     _id: req.body.id,
     description: req.body.description,
     creator: req.userData.userId,
+    // NOTE: your create uses "bedroom", update uses "bedRoom" – leaving as-is
     bedRoom: req.body.bedRoom,
     bathroom: req.body.bathroom,
     furnished: req.body.furnished,
@@ -333,6 +400,7 @@ exports.editPost = (req, res, next) => {
     price: req.body.price,
     dateListed: req.body.dateListed,
     dateAvailableForRent: req.body.dateAvailableForRent,
+    // lat / lng / location will be injected by geocodeAddressForPost
   };
 
   // Only update imagePath if new images were uploaded or provided
@@ -340,25 +408,34 @@ exports.editPost = (req, res, next) => {
     postUpdateData.imagePath = imagePath;
   }
 
-  // Note: this logs entire req object; kept as-is, but routed through logger
   logger.info("editPost raw request and update data", {
-    req,
     postUpdateData,
     creatorField: req.userData && req.userData.creator,
   });
 
-  // Optional: prevent editing soft-deleted posts
-  Post.updateOne(
-    { _id: postId, creator: req.userData.userId, isDeleted: { $ne: true } }, // do not edit deleted posts
-    postUpdateData
-  )
+  // 🔍 Geocode the updated address fields first, then run updateOne
+  geocodeAddressForPost(postUpdateData)
+    .catch((err) => {
+      logger.error("[Geocode] editPost failed", { error: err.message || err });
+      // swallow error so edit still works
+      return postUpdateData;
+    })
+    .then((geoEnhanced) => {
+      return Post.updateOne(
+        {
+          _id: postId,
+          creator: req.userData.userId,
+          isDeleted: { $ne: true }, // do not edit deleted posts
+        },
+        geoEnhanced
+      );
+    })
     .then((result) => {
       logger.info("Update result", { postId, result });
 
       // Handle both Mongoose 5 and 6 shapes
       const modified =
-        result.modifiedCount > 0 ||
-        result.nModified > 0; // fallback for older versions
+        result.modifiedCount > 0 || result.nModified > 0; // fallback for older versions
 
       if (modified) {
         res.status(200).json({ message: "Update Successful!" });
@@ -374,6 +451,7 @@ exports.editPost = (req, res, next) => {
       res.status(500).json({ message: "Update Failed!" });
     });
 };
+
 
 
 /**
@@ -477,5 +555,44 @@ exports.listPostSearch = async (req, res, next) => {
   } catch (error) {
     logger.error("listPostSearch error", { error });
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// search close to addresss
+
+exports.getPostsNear = async (req, res) => {
+  try {
+    const { lat, lng, radiusKm = 5 } = req.query;
+
+    if (!lat || !lng) {
+      return res.status(400).json({ message: "lat and lng are required" });
+    }
+
+    const radiusInMeters = Number(radiusKm) * 1000;
+
+    const filter = {
+      status: "active",
+      isDeleted: { $ne: true },
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [Number(lng), Number(lat)],
+          },
+          $maxDistance: radiusInMeters,
+        },
+      },
+    };
+
+    const posts = await Post.find(filter)
+      .select(
+        "title price address city province country zipcode dateListed dateAvailableForRent bedroom bathroom rentType typeOfProperty furnished parkingAvailable imagePath featured lat lng"
+      )
+      .lean();
+
+    res.json({ posts });
+  } catch (err) {
+    console.error("getPostsNear error:", err);
+    res.status(500).json({ message: "Failed to fetch nearby posts." });
   }
 };

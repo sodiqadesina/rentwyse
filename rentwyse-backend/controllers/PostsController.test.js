@@ -11,13 +11,9 @@
  *  - plus static methods: updateOne, findOne
  */
 
-const Post = require("../models/post");
-const postsController = require("./PostsController");
+// --- MOCKS MUST COME FIRST -------------------------------------
 
-// --- Mock the Post model (constructor + static methods) --------------------
-
-// IMPORTANT: jest.mock must be above the require in real file order.
-// In your actual file, move this `jest.mock` to the top of the file if needed.
+// Mock Post model (constructor + static methods)
 jest.mock("../models/post", () => {
   // Mock constructor: new Post(doc)
   const MockPostConstructor = jest.fn().mockImplementation((doc) => {
@@ -30,7 +26,24 @@ jest.mock("../models/post", () => {
         description: doc.description,
         imagePath: doc.imagePath || [],
         creator: doc.creator,
-        // Add other fields as needed
+        // keep all other fields so controller can read them if needed
+        bedroom: doc.bedroom,
+        bathroom: doc.bathroom,
+        furnished: doc.furnished,
+        typeOfProperty: doc.typeOfProperty,
+        parkingAvailable: doc.parkingAvailable,
+        rentType: doc.rentType,
+        city: doc.city,
+        address: doc.address,
+        province: doc.province,
+        zipcode: doc.zipcode,
+        country: doc.country,
+        price: doc.price,
+        dateListed: doc.dateListed,
+        dateAvailableForRent: doc.dateAvailableForRent,
+        lat: doc.lat,
+        lng: doc.lng,
+        location: doc.location,
       }),
     };
   });
@@ -42,7 +55,21 @@ jest.mock("../models/post", () => {
   return MockPostConstructor;
 });
 
-// --- Common res mock -------------------------------------------------------
+// Mock axios used by geocodeAddressForPost so tests never call real API
+jest.mock("axios", () => ({
+  get: jest.fn().mockResolvedValue({
+    data: {
+      results: [], // no geocode result → controller still works and saves post
+    },
+  }),
+}));
+
+// --- IMPORTS AFTER MOCKS ---------------------------------------
+
+const Post = require("../models/post");
+const postsController = require("./PostsController");
+
+// --- Common res mock -------------------------------------------
 
 const createMockRes = () => ({
   status: jest.fn().mockReturnThis(),
@@ -80,7 +107,7 @@ describe("PostController - deletePost", () => {
         _id: "123",
         creator: "user123",
         isDeleted: { $ne: true },
-        status: { $ne: "deleted" },       // <- new condition
+        status: { $ne: "deleted" }, // controller: only delete non-deleted posts
       },
       {
         $set: expect.objectContaining({
@@ -116,9 +143,9 @@ describe("PostController - deletePost", () => {
         _id: "non-existent-id",
         creator: "user123",
         isDeleted: { $ne: true },
-        status: { $ne: "deleted" },       // <- new condition
+        status: { $ne: "deleted" },
       },
-      expect.any(Object) // update document (we don't care exact shape here)
+      expect.any(Object) // we don't care about the exact $set object here
     );
 
     expect(res.status).toHaveBeenCalledWith(404);
@@ -176,7 +203,7 @@ describe("PostController - newPost", () => {
     );
   });
 
-  it("should not proceed if userId is missing (throws or handles error)", async () => {
+  it("should not proceed if userId is missing", async () => {
     const req = {
       body: {
         title: "Test Post Without UserId",
@@ -190,16 +217,13 @@ describe("PostController - newPost", () => {
 
     const res = createMockRes();
 
-    // Depending on your implementation, newPost might throw or send 401/400.
-    // We'll just assert that it doesn't send a successful response.
-    try {
-      await postsController.newPost(req, res);
-    } catch (e) {
-      // ignore – the test focuses on not returning success
-    }
+    await postsController.newPost(req, res);
 
-    expect(res.status).not.toHaveBeenCalledWith(201);
-    // Optionally you could assert a 400/401 here if that's in your controller.
+    // For missing userId, controller should return 401 and not 201
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "User not authenticated.",
+    });
   });
 });
 

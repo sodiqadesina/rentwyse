@@ -26,7 +26,23 @@ const postSchema = mongoose.Schema({
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
 
+  // GeoLocation & GeoJSON  - for proper geospatial queries
+  lat: Number,
+  lng: Number,
 
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number], // [lng, lat]
+      index: "2dsphere",
+    },
+  },
+
+  //status 
   status: {
     type: String,
     enum: ["draft", "active", "flagged", "deleted"],

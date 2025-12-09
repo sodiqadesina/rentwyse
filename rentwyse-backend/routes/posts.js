@@ -12,10 +12,13 @@ router.post("", checkAuth, extractFile, PostController.newPost);
 router.get("", PostController.listPost);
 
 // example
-// http://localhost:3000/api/search-posts?city=Waterloo
+//http://localhost:3000/api/search-posts?city=Waterloo
 //http://localhost:3000/api/search-posts?bedroom=2&furnished=true&price=1000
 //search-post
 router.get("/search-posts", PostController.listPostSearch);
+
+//search-post-near address
+router.get("/near", PostController.getPostsNear);
 
 // // Fetching post by post Id
 router.get("/:id", PostController.listPostById);

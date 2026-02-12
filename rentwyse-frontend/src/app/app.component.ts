@@ -2,6 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import { Router, NavigationEnd } from "@angular/router";
 import { filter } from "rxjs/operators";
 import { AuthService } from "./auth/auth.service";
+import { environment } from "../environments/environment";
+
 
 @Component({
   selector: "app-root",
@@ -17,6 +19,7 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     // restore auth state on refresh
     this.authService.autoAuthUser();
+    this.warmUpBackend();
 
     // watch route changes to know when we're on /admin
     this.router.events
@@ -26,4 +29,14 @@ export class AppComponent implements OnInit {
         this.isAdminRoute = url.startsWith("/admin");
       });
   }
+  private warmUpBackend() {
+  fetch(`${environment.apiUrl}/health`, {
+    method: "GET",
+    cache: "no-store",
+    mode: "cors",
+  }).catch(() => {
+    // intentionally ignored - this request is only used to wake the backend
+  });
+}
+
 }

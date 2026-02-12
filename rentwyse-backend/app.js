@@ -95,6 +95,9 @@ app.use("/api/kyc", kycRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/admin", adminRoutes);
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 app.get("/", (req, res) => {
   res.send("welcome to rent-wyse");
 });
